@@ -49,6 +49,8 @@ python3 app.py
 
 ## Persoenliche Bewertung (Stand: 20. Februar 2026)
 
+Diese Bewertung wurde persoenlich von **AIDRAX (KI-Assistent)** abgegeben.
+
 Meine persoenliche Bewertung fuer dieses Projekt: **8.6/10**.
 
 Staerken:
