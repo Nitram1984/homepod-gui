@@ -2,6 +2,13 @@
 
 Lokale Web-GUI fuer HomePod-Steuerung ueber `atvremote`.
 
+## Warum dieses Projekt existiert
+
+- Nutzer sollen ihre eigenen Geraete lokal steuern koennen, ohne unnoetige Cloud-Abhaengigkeit.
+- Interoperabilitaet ist ein legitimes Nutzerinteresse: Wenn offizielle Wege fehlen, baut die Community praktikable Loesungen.
+- Das Projekt zeigt, dass Nutzer mit offener Dokumentation und Zusammenarbeit reale Probleme selbst loesen koennen.
+- Fokus ist ein verantwortungsvoller Einsatz im eigenen Setup.
+
 ## Start
 
 ```bash
