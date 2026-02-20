@@ -50,6 +50,7 @@ Hinweis: `DEINE_HOMEPOD_IP` und `DEINE_APPLETV_IP` sind nur Platzhalter. Bitte d
 - Benoetigt `ffmpeg` auf dem Laptop
 - Nutzt standardmaessig X11-Quelle `:0.0` (bei Wayland kann das scheitern)
 - Stream wird lokal unter `http://<deine-laptop-ip>:8911/stream.m3u8` bereitgestellt
+- Hinweis: `<deine-laptop-ip>` ist ein Platzhalter und muss durch die echte IP-Adresse deines Laptops ersetzt werden.
 
 ## Persoenliche Bewertung (Stand: 20. Februar 2026)
 
