@@ -46,3 +46,17 @@ python3 app.py
 - Benoetigt `ffmpeg` auf dem Laptop
 - Nutzt standardmaessig X11-Quelle `:0.0` (bei Wayland kann das scheitern)
 - Stream wird lokal unter `http://<deine-laptop-ip>:8911/stream.m3u8` bereitgestellt
+
+## Persoenliche Bewertung (Stand: 20. Februar 2026)
+
+Meine persoenliche Bewertung fuer dieses Projekt: **8.6/10**.
+
+Staerken:
+- Sehr schneller Praxisnutzen: HomePod + Apple TV Kontrolle in einer einzigen, lokalen GUI
+- Gute Funktionsbreite (Playback, Queue, App-Start, Voice-Commands, Screen-Optionen)
+- Sinnvoll fuer Heimnetz-Setups ohne Cloud-Zwang
+
+Was als naechstes den groessten Sprung bringt:
+- Stabileres AirPlay-Handling bei `play_url`-Sonderfaellen (z. B. `playback-info 500`)
+- Optionales Pairing/Connection-Wizard direkt in der GUI
+- Robusteres Mirroring-Fallback fuer unterschiedliche Linux-Desktop-Umgebungen
