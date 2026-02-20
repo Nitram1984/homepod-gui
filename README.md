@@ -5,23 +5,27 @@ Lokale Web-GUI fuer HomePod-Steuerung ueber `atvremote`.
 ## Start
 
 ```bash
-cd /home/maddin/homepod-gui
+cd /pfad/zu/homepod-gui
 python3 app.py
 ```
 
 Dann im Browser:
 
 ```text
-http://127.0.0.1:8788
+http://localhost:8788
 ```
 
 ## Optional: Startwerte per Env setzen
 
 ```bash
-HOMEPOD_IP="192.168.178.183" \
-HOMEPOD_NAME="Wohnzimmer" \
+HOMEPOD_IP="DEINE_HOMEPOD_IP" \
+HOMEPOD_NAME="HomePod" \
+APPLETV_IP="DEINE_APPLETV_IP" \
+APPLETV_NAME="Apple TV" \
 python3 app.py
 ```
+
+Hinweis: `DEINE_HOMEPOD_IP` und `DEINE_APPLETV_IP` sind nur Platzhalter. Bitte durch die echten IP-Adressen deiner Geraete ersetzen.
 
 ## Funktionen
 
