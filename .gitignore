@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Local runtime data
+uploads/
+screencast/
+*.log
+
+# Environment / editor files
+.env
+.env.*
+.DS_Store

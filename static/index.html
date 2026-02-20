@@ -1,0 +1,1826 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HomePod Control</title>
+  <style>
+    :root {
+      --bg: #050712;
+      --bg-2: #090d1f;
+      --card: rgba(11, 15, 31, 0.78);
+      --card-2: rgba(7, 10, 24, 0.9);
+      --ink: #e5e9f5;
+      --muted: #9aa4c2;
+      --line: rgba(255, 255, 255, 0.14);
+      --accent: #15f6ff;
+      --accent-2: #ff3dff;
+      --accent-3: #7cff6b;
+      --accent-4: #ffe86b;
+      --danger: #ff5e7e;
+      --ok: #76ffce;
+      --radius: 18px;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+      --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.35);
+      --font: "Rajdhani", "Orbitron", "IBM Plex Sans", "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", "JetBrains Mono", "Consolas", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 860px at 16% 6%, rgba(21, 246, 255, 0.14), transparent 60%),
+        radial-gradient(1100px 880px at 88% 18%, rgba(255, 61, 255, 0.14), transparent 58%),
+        radial-gradient(940px 780px at 52% 100%, rgba(124, 255, 107, 0.08), transparent 58%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 70%);
+      animation: scene 620ms ease-out;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::before {
+      background:
+        linear-gradient(rgba(21, 246, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(21, 246, 255, 0.06) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(circle at 50% 35%, black, transparent 80%);
+      opacity: 0.45;
+    }
+
+    body::after {
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.03) 0%,
+        rgba(255, 255, 255, 0) 28%,
+        rgba(255, 255, 255, 0) 72%,
+        rgba(255, 255, 255, 0.04) 100%
+      );
+      opacity: 0.5;
+    }
+
+    @keyframes scene {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.995);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 26px 18px 38px;
+    }
+
+    .head {
+      margin-bottom: 22px;
+    }
+
+    .brand-panel {
+      position: relative;
+      border-radius: calc(var(--radius) + 4px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 16px 16px 14px;
+      background: linear-gradient(180deg, rgba(10, 14, 30, 0.9), rgba(6, 10, 24, 0.84));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: conic-gradient(
+        from 180deg,
+        rgba(21, 246, 255, 0.52),
+        rgba(255, 61, 255, 0.48),
+        rgba(124, 255, 107, 0.42),
+        rgba(255, 232, 107, 0.4),
+        rgba(21, 246, 255, 0.52)
+      );
+      filter: blur(16px);
+      opacity: 0.6;
+      z-index: -1;
+    }
+
+    .brand-panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.16),
+        rgba(255, 255, 255, 0.04) 22%,
+        rgba(0, 0, 0, 0.22) 100%
+      );
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    .brand-line {
+      margin: 0 0 5px;
+      font-size: 0.78rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-shadow: 0 0 14px rgba(21, 246, 255, 0.45);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.7rem, 3.8vw, 2.35rem);
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: linear-gradient(
+        90deg,
+        var(--accent),
+        #6ee8ff 22%,
+        var(--accent-2) 55%,
+        var(--accent-3) 82%,
+        var(--accent-4)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow:
+        0 0 12px rgba(21, 246, 255, 0.23),
+        0 0 18px rgba(255, 61, 255, 0.2);
+    }
+
+    .sub {
+      margin: 6px 0 10px;
+      color: var(--muted);
+      font-size: 0.98rem;
+      max-width: 62ch;
+    }
+
+    .head-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .head-pill {
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: inset 0 0 16px rgba(21, 246, 255, 0.1);
+    }
+
+    .overview {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .overview-item {
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(2, 9, 23, 0.66);
+      padding: 7px 9px 8px;
+      box-shadow: inset 0 0 18px rgba(21, 246, 255, 0.08);
+    }
+
+    .overview-label {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: #a7b4d8;
+      margin-bottom: 2px;
+    }
+
+    .overview-value {
+      display: block;
+      font-size: 0.96rem;
+      letter-spacing: 0.04em;
+      color: #ecf4ff;
+      font-weight: 700;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 15px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transform-style: preserve-3d;
+      transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -50% -10% auto;
+      height: 60%;
+      background: linear-gradient(
+        110deg,
+        rgba(21, 246, 255, 0.22),
+        rgba(255, 61, 255, 0.18),
+        rgba(124, 255, 107, 0.15),
+        rgba(255, 255, 255, 0)
+      );
+      transform: rotate(6deg);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-4px) rotateX(1.5deg);
+      border-color: rgba(21, 246, 255, 0.45);
+      box-shadow:
+        0 22px 52px rgba(0, 0, 0, 0.55),
+        0 0 22px rgba(21, 246, 255, 0.2);
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 0.98rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #cde2ff;
+      text-shadow: 0 0 10px rgba(21, 246, 255, 0.32);
+    }
+
+    .card-sub {
+      margin: -2px 0 10px;
+      color: #9fb0d7;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: #a7b4d8;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(1, 8, 24, 0.6);
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1px rgba(21, 246, 255, 0.05);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      font-family: var(--mono);
+    }
+
+    input[type="text"]:focus {
+      border-color: rgba(21, 246, 255, 0.76);
+      box-shadow:
+        inset 0 0 0 1px rgba(21, 246, 255, 0.26),
+        0 0 0 3px rgba(21, 246, 255, 0.12),
+        0 0 18px rgba(21, 246, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      filter: drop-shadow(0 0 8px rgba(21, 246, 255, 0.42));
+    }
+
+    .control-group + .control-group {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .control-title {
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #a5b6dd;
+      margin: 0 0 4px;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .service-btn {
+      min-height: 44px;
+    }
+
+    .voice-status {
+      margin-top: 10px;
+      min-height: 48px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .voice-live {
+      color: var(--accent-4);
+      text-shadow: 0 0 10px rgba(255, 232, 107, 0.3);
+    }
+
+    .voice-idle {
+      color: #a7b5d8;
+    }
+
+    .mic-active {
+      border-color: rgba(255, 232, 107, 0.85);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        0 14px 24px rgba(0, 0, 0, 0.45),
+        0 0 22px rgba(255, 232, 107, 0.4);
+      filter: saturate(1.15);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .queue-row {
+      grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+    }
+
+    .queue-row .queue-badge {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+
+    button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      isolation: isolate;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 11px;
+      padding: 10px 13px;
+      min-height: 44px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.77rem;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-transform: uppercase;
+      color: #f5f8ff;
+      background:
+        radial-gradient(120% 140% at 20% 18%, rgba(255, 255, 255, 0.18), transparent 46%),
+        linear-gradient(140deg, rgba(57, 78, 118, 0.84), rgba(15, 23, 41, 0.98));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -8px 14px rgba(0, 0, 0, 0.28),
+        0 10px 20px rgba(0, 0, 0, 0.34),
+        0 0 18px rgba(21, 246, 255, 0.2);
+      transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease, filter 160ms ease, background 180ms ease;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.25),
+        rgba(255, 255, 255, 0.05) 42%,
+        rgba(0, 0, 0, 0.18) 100%
+      );
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    button::after {
+      content: "";
+      position: absolute;
+      top: -120%;
+      left: -40%;
+      width: 50%;
+      height: 320%;
+      background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.25) 48%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(16deg);
+      transition: left 260ms ease;
+      pointer-events: none;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(21, 246, 255, 0.8);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -8px 14px rgba(0, 0, 0, 0.34),
+        0 14px 22px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(21, 246, 255, 0.34);
+      filter: saturate(1.08);
+    }
+
+    button:hover::after {
+      left: 115%;
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:focus-visible {
+      outline: none;
+      border-color: rgba(21, 246, 255, 0.95);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.26),
+        0 0 0 3px rgba(21, 246, 255, 0.2),
+        0 0 22px rgba(21, 246, 255, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+      filter: grayscale(0.35);
+      transform: none;
+    }
+
+    .btn-primary {
+      background:
+        radial-gradient(120% 140% at 20% 18%, rgba(255, 255, 255, 0.24), transparent 46%),
+        linear-gradient(140deg, rgba(21, 246, 255, 0.58), rgba(20, 38, 76, 0.98));
+    }
+
+    .btn-secondary,
+    .alt {
+      background:
+        radial-gradient(120% 140% at 20% 18%, rgba(255, 255, 255, 0.22), transparent 46%),
+        linear-gradient(140deg, rgba(124, 255, 107, 0.58), rgba(20, 60, 42, 0.98));
+    }
+
+    .btn-tertiary,
+    .warm {
+      background:
+        radial-gradient(120% 140% at 20% 18%, rgba(255, 255, 255, 0.22), transparent 46%),
+        linear-gradient(140deg, rgba(255, 61, 255, 0.56), rgba(74, 12, 88, 0.98));
+    }
+
+    .btn-danger,
+    .danger {
+      background:
+        radial-gradient(120% 140% at 20% 18%, rgba(255, 255, 255, 0.2), transparent 46%),
+        linear-gradient(140deg, rgba(255, 94, 126, 0.64), rgba(104, 16, 44, 0.98));
+    }
+
+    .pill {
+      display: inline-block;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: #dbe6ff;
+      box-shadow: inset 0 0 14px rgba(21, 246, 255, 0.12);
+    }
+
+    .status {
+      margin-top: 8px;
+      background: rgba(5, 10, 24, 0.72);
+      border: 1px dashed rgba(21, 246, 255, 0.38);
+      border-radius: 10px;
+      padding: 9px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      min-height: 66px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #dce8ff;
+      box-shadow: inset 0 0 22px rgba(21, 246, 255, 0.06);
+    }
+
+    .status-compact {
+      min-height: 48px;
+      font-size: 0.8rem;
+      line-height: 1.35;
+    }
+
+    .list {
+      margin-top: 10px;
+      display: grid;
+      gap: 7px;
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .list-item {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      background: rgba(2, 8, 20, 0.65);
+      padding: 8px;
+      box-shadow: inset 0 0 12px rgba(21, 246, 255, 0.08);
+    }
+
+    .list-name {
+      display: block;
+      font-size: 0.84rem;
+      color: #e9f2ff;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .list-meta {
+      display: block;
+      margin-top: 3px;
+      font-size: 0.72rem;
+      color: #9db0da;
+      letter-spacing: 0.03em;
+    }
+
+    .list-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .mini-btn {
+      min-height: 30px;
+      padding: 6px 8px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+    }
+
+    .queue-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.78rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: #dce8ff;
+    }
+
+    .output {
+      min-height: 220px;
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      background: rgba(2, 8, 20, 0.84);
+      border-color: rgba(255, 61, 255, 0.33);
+    }
+
+    .ok {
+      color: var(--ok);
+      font-weight: 700;
+      text-shadow: 0 0 12px rgba(118, 255, 206, 0.3);
+    }
+
+    .bad {
+      color: var(--danger);
+      font-weight: 700;
+      text-shadow: 0 0 12px rgba(255, 94, 126, 0.35);
+    }
+
+    @media (max-width: 680px) {
+      .wrap {
+        padding: 16px 12px 24px;
+      }
+
+      .brand-panel {
+        padding: 14px 12px 12px;
+      }
+
+      .title {
+        font-size: clamp(1.45rem, 7.4vw, 1.95rem);
+      }
+
+      .overview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .service-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        gap: 6px;
+      }
+
+      .btn-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div class="brand-panel">
+        <div class="brand-line">AIDRAX // Neon Cyberpunk 3D</div>
+        <h1 class="title">HomePod Control Node</h1>
+        <p class="sub">Steuerung fuer Lautstaerke, Stream, ATV Remote und Diagnostik ueber <code>atvremote</code>.</p>
+        <div class="head-pills">
+          <span class="head-pill">AirPlay</span>
+          <span class="head-pill">RAOP</span>
+          <span class="head-pill">Low Latency</span>
+          <span class="head-pill" id="headNode">Node: -</span>
+        </div>
+        <div class="overview">
+          <div class="overview-item">
+            <span class="overview-label">Geraet</span>
+            <span id="overviewNode" class="overview-value">-</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">IP</span>
+            <span id="overviewIp" class="overview-value">-</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Lautstaerke</span>
+            <span id="overviewVolume" class="overview-value">-</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Stream</span>
+            <span id="overviewStream" class="overview-value">-</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">State</span>
+            <span id="overviewState" class="overview-value">-</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="dashboard">
+      <div class="stack main-stack">
+        <article class="card">
+          <h2>Playback</h2>
+          <p class="card-sub">Quelle setzen, Musik/Video hinzufuegen, Stream starten/stoppen und Zustand abrufen.</p>
+          <label for="path">Datei oder URL</label>
+          <input id="path" type="text" placeholder="/voller/pfad/zur/datei.mp3">
+          <input
+            id="mediaFileInput"
+            type="file"
+            accept="audio/*,video/*,.mp3,.m4a,.aac,.flac,.wav,.ogg,.opus,.mp4,.m4v,.mov,.mkv,.webm,.avi"
+            style="display:none;"
+          >
+          <div class="row btn-row">
+            <button id="addMedia" class="btn-tertiary">Medien hinzufuegen</button>
+            <button id="queueAdd" class="btn-secondary">Zur Playlist</button>
+            <button id="play" class="btn-primary">Play</button>
+            <button id="stop" class="btn-danger">Stop</button>
+            <button id="refreshPlaying" class="btn-secondary">Status</button>
+          </div>
+          <div class="row">
+            <span id="mediaHint" class="pill">Keine Datei ausgewaehlt</span>
+          </div>
+          <div class="control-group">
+            <p class="control-title">Playlist</p>
+            <div class="row btn-row queue-row">
+              <button id="queueStart" class="btn-primary">Playlist Start</button>
+              <button id="queueNext" class="btn-tertiary">Naechster</button>
+              <button id="queueClear" class="btn-danger">Playlist leeren</button>
+              <span id="queueBadge" class="queue-badge">Queue: -</span>
+            </div>
+            <div id="queueList" class="list">
+              <div class="list-item"><span class="list-meta">Queue leer</span></div>
+            </div>
+          </div>
+          <div class="control-group">
+            <p class="control-title">Zuletzt hinzugefuegte Medien</p>
+            <div id="historyList" class="list">
+              <div class="list-item"><span class="list-meta">Noch keine Uploads</span></div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <span class="pill">Stream: <strong id="streamFlag">-</strong></span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>ATV Remote</h2>
+          <p class="card-sub">Direkte Fernbedienung in logischen Gruppen.</p>
+          <div class="control-group">
+            <p class="control-title">Transport</p>
+            <div class="row btn-row">
+              <button id="rPlayPause" class="btn-primary">Play/Pause</button>
+              <button id="rPlay" class="btn-tertiary">Play</button>
+              <button id="rPause" class="btn-tertiary">Pause</button>
+              <button id="rStop" class="btn-danger">Stop</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <p class="control-title">Navigation</p>
+            <div class="row btn-row">
+              <button id="rPrev" class="btn-secondary">Prev</button>
+              <button id="rNext" class="btn-secondary">Next</button>
+              <button id="rSkipBack" class="btn-secondary">Skip -</button>
+              <button id="rSkipFwd" class="btn-secondary">Skip +</button>
+              <button id="rMenu" class="btn-secondary">Menu</button>
+              <button id="rHome" class="btn-secondary">Home</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <p class="control-title">Volume Step</p>
+            <div class="row btn-row">
+              <button id="rVolUp" class="btn-tertiary">Vol +</button>
+              <button id="rVolDown" class="btn-tertiary">Vol -</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Rueckmeldung</h2>
+          <p class="card-sub">Live-Meldungen und Rohausgabe der Kommandos.</p>
+          <div id="status" class="status">Bereit.</div>
+          <div id="output" class="status output">(keine Ausgabe)</div>
+        </article>
+      </div>
+
+      <aside class="stack side-stack">
+        <article class="card">
+          <h2>Geraet</h2>
+          <p class="card-sub">Verbindungsziel fuer alle Kommandos.</p>
+          <label for="ip">IP</label>
+          <input id="ip" type="text" placeholder="192.168.x.x">
+          <label for="name" style="margin-top:8px;">Name</label>
+          <input id="name" type="text" placeholder="Wohnzimmer">
+          <div class="row btn-row">
+            <button id="saveConfig" class="btn-primary">Speichern</button>
+            <button id="reloadConfig" class="btn-secondary">Neu laden</button>
+          </div>
+          <div class="control-group">
+            <p class="control-title">Verbindung</p>
+            <div class="row btn-row">
+              <button id="connectHomepod" class="btn-primary">HomePod verbinden</button>
+              <button id="connectAppleTV" class="btn-secondary">Apple TV verbinden</button>
+              <button id="connectAll" class="btn-tertiary">Alle verbinden</button>
+            </div>
+            <div id="connectStatus" class="status status-compact">Verbindung: nicht geprueft</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Lautstaerke</h2>
+          <p class="card-sub">Praezise Regelung und schnelle Schritte.</p>
+          <span class="pill">Aktuell: <strong id="volumeLabel">-</strong>%</span>
+          <div class="row" style="margin-top:10px;">
+            <input id="volumeSlider" type="range" min="0" max="100" step="1" value="45">
+          </div>
+          <div class="row btn-row">
+            <button id="setVolume" class="btn-primary">Setzen</button>
+            <button id="volDown" class="btn-tertiary">-5</button>
+            <button id="volUp" class="btn-tertiary">+5</button>
+            <button id="refreshVolume" class="btn-secondary">Abfragen</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>ATV Tools</h2>
+          <p class="card-sub">Diagnose und freie Befehle.</p>
+          <div class="row btn-row">
+            <button id="showFeatures" class="btn-secondary">Features</button>
+            <button id="showDeviceInfo" class="btn-secondary">Device Info</button>
+            <button id="scanDevices" class="btn-tertiary">Scan</button>
+          </div>
+          <label for="rawCommand" style="margin-top:10px;">Direkter atvremote command</label>
+          <input id="rawCommand" type="text" placeholder='z.B. "playing" oder "volume_up"'>
+          <div class="row btn-row">
+            <button id="runRawCommand" class="btn-primary">Ausfuehren</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Dienste & Sprachsteuerung</h2>
+          <p class="card-sub">Apps werden direkt auf Apple TV gestartet (kein Web-Fallback).</p>
+          <label for="tvIp">Apple TV IP</label>
+          <input id="tvIp" type="text" placeholder="192.168.x.x">
+          <label for="tvName" style="margin-top:8px;">Apple TV Name</label>
+          <input id="tvName" type="text" placeholder="Maddin">
+          <div class="row btn-row">
+            <button id="saveTvConfig" class="btn-primary">TV speichern</button>
+            <button id="reloadTvConfig" class="btn-secondary">TV laden</button>
+          </div>
+          <div class="service-grid">
+            <button id="svcNetflix" class="service-btn btn-secondary">Netflix</button>
+            <button id="svcAmazon" class="service-btn btn-secondary">Amazon</button>
+            <button id="svcJoyn" class="service-btn btn-secondary">Joyn</button>
+            <button id="svcSpotify" class="service-btn btn-secondary">Spotify</button>
+          </div>
+          <div class="row btn-row">
+            <button id="voiceToggle" class="btn-tertiary">Voice Start</button>
+            <button id="voiceHelp" class="btn-secondary">Befehle</button>
+          </div>
+          <div id="voiceStatus" class="status voice-status voice-idle">Sprachsteuerung: inaktiv</div>
+        </article>
+
+        <article class="card">
+          <h2>Bildschirm Stream</h2>
+          <p class="card-sub">Laptop-Bildschirm live auf Apple TV via <code>play_url</code>.</p>
+          <label for="screenDisplay">Display (X11)</label>
+          <input id="screenDisplay" type="text" placeholder=":0.0">
+          <div class="field-grid">
+            <div>
+              <label for="screenSize">Aufloesung</label>
+              <input id="screenSize" type="text" placeholder="1280x720">
+            </div>
+            <div>
+              <label for="screenFps">FPS</label>
+              <input id="screenFps" type="text" placeholder="22">
+            </div>
+          </div>
+          <div class="row btn-row">
+            <button id="screenStart" class="btn-primary">Screen Start</button>
+            <button id="screenStop" class="btn-danger">Screen Stop</button>
+            <button id="screenRefresh" class="btn-secondary">Screen Status</button>
+          </div>
+          <div class="row btn-row">
+            <button id="systemMirrorOpen" class="btn-tertiary">System Mirror</button>
+          </div>
+          <div id="screenStatus" class="status status-compact">Screen-Stream: inaktiv</div>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const statusEl = $("status");
+    const outputEl = $("output");
+    const headNodeEl = $("headNode");
+    const overviewNodeEl = $("overviewNode");
+    const overviewIpEl = $("overviewIp");
+    const overviewVolumeEl = $("overviewVolume");
+    const overviewStreamEl = $("overviewStream");
+    const overviewStateEl = $("overviewState");
+    const connectStatusEl = $("connectStatus");
+    const mediaHintEl = $("mediaHint");
+    const queueBadgeEl = $("queueBadge");
+    const queueListEl = $("queueList");
+    const historyListEl = $("historyList");
+    const mediaFileInputEl = $("mediaFileInput");
+    const voiceStatusEl = $("voiceStatus");
+    const voiceToggleBtn = $("voiceToggle");
+    const screenStatusEl = $("screenStatus");
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+    const SERVICE_MAP = {
+      netflix: { label: "Netflix" },
+      amazon: { label: "Amazon" },
+      joyn: { label: "Joyn" },
+      spotify: { label: "Spotify" }
+    };
+
+    let voiceRecognition = null;
+    let voiceEnabled = false;
+
+    function setStatus(message, isError = false) {
+      statusEl.innerHTML = isError
+        ? `<span class="bad">Fehler:</span> ${message}`
+        : `<span class="ok">OK:</span> ${message}`;
+    }
+
+    function setOutput(text) {
+      const trimmed = (text || "").toString().trim();
+      outputEl.textContent = trimmed || "(keine Ausgabe)";
+    }
+
+    function setVoiceStatus(message, active = false) {
+      if (!voiceStatusEl) {
+        return;
+      }
+      voiceStatusEl.textContent = message;
+      voiceStatusEl.classList.toggle("voice-live", active);
+      voiceStatusEl.classList.toggle("voice-idle", !active);
+      if (voiceToggleBtn) {
+        voiceToggleBtn.classList.toggle("mic-active", active);
+        voiceToggleBtn.textContent = active ? "Voice Stop" : "Voice Start";
+      }
+    }
+
+    function setConnectStatus(message, isError = false) {
+      if (!connectStatusEl) {
+        return;
+      }
+      if (isError) {
+        connectStatusEl.innerHTML = `<span class="bad">${message}</span>`;
+        return;
+      }
+      connectStatusEl.innerHTML = `<span class="ok">${message}</span>`;
+    }
+
+    function setMediaHint(message) {
+      if (!mediaHintEl) {
+        return;
+      }
+      mediaHintEl.textContent = message;
+    }
+
+    function setScreenStatus(message, isError = false) {
+      if (!screenStatusEl) {
+        return;
+      }
+      const safe = escapeHtml(message);
+      screenStatusEl.innerHTML = isError ? `<span class="bad">${safe}</span>` : safe;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function shortNameFromPath(path) {
+      if (!path) {
+        return "-";
+      }
+      const normalized = String(path).replace(/\\/g, "/");
+      const parts = normalized.split("/");
+      return parts[parts.length - 1] || normalized;
+    }
+
+    function formatBytes(bytesRaw) {
+      const bytes = Number(bytesRaw || 0);
+      if (!Number.isFinite(bytes) || bytes <= 0) {
+        return "0 B";
+      }
+      const units = ["B", "KB", "MB", "GB"];
+      let idx = 0;
+      let value = bytes;
+      while (value >= 1024 && idx < units.length - 1) {
+        value /= 1024;
+        idx += 1;
+      }
+      const decimals = idx === 0 ? 0 : 1;
+      return `${value.toFixed(decimals)} ${units[idx]}`;
+    }
+
+    function formatUploadTime(tsRaw) {
+      const ts = Number(tsRaw || 0);
+      if (!Number.isFinite(ts) || ts <= 0) {
+        return "-";
+      }
+      const d = new Date(ts * 1000);
+      return d.toLocaleString("de-DE", { hour12: false });
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok === false) {
+        throw new Error(data.error || `${response.status} ${response.statusText}`);
+      }
+      return data;
+    }
+
+    async function loadConfig() {
+      const data = await api("/api/config");
+      $("ip").value = data.ip || "";
+      $("name").value = data.name || "";
+      if (headNodeEl) {
+        headNodeEl.textContent = `Node: ${data.name || "-"}`;
+      }
+      if (overviewNodeEl) {
+        overviewNodeEl.textContent = data.name || "-";
+      }
+      if (overviewIpEl) {
+        overviewIpEl.textContent = data.ip || "-";
+      }
+      setStatus(`Geraet geladen: ${data.name} (${data.ip})`);
+    }
+
+    async function saveConfig() {
+      const body = {
+        ip: $("ip").value.trim(),
+        name: $("name").value.trim()
+      };
+      const data = await api("/api/config", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      setStatus(`Geraet gespeichert: ${data.name} (${data.ip})`);
+    }
+
+    async function loadTVConfig() {
+      const data = await api("/api/tv_config");
+      $("tvIp").value = data.ip || "";
+      $("tvName").value = data.name || "";
+      setStatus(`Apple TV geladen: ${data.name} (${data.ip})`);
+    }
+
+    async function saveTVConfig() {
+      const body = {
+        ip: $("tvIp").value.trim(),
+        name: $("tvName").value.trim()
+      };
+      const data = await api("/api/tv_config", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      setStatus(`Apple TV gespeichert: ${data.name} (${data.ip})`);
+    }
+
+    function formatConnectionLine(entry) {
+      const prefix = entry.connected ? "OK" : "FAIL";
+      const detail = entry.connected ? "verbunden" : (entry.stderr || "nicht verbunden");
+      return `${prefix} ${entry.target} (${entry.name} ${entry.ip}) - ${detail}`;
+    }
+
+    async function connectTarget(target = "all") {
+      const data = await api("/api/connect", {
+        method: "POST",
+        body: JSON.stringify({ target })
+      });
+
+      const lines = [];
+      if (data.homepod) {
+        lines.push(formatConnectionLine(data.homepod));
+      }
+      if (data.appletv) {
+        lines.push(formatConnectionLine(data.appletv));
+      }
+      if (lines.length === 0) {
+        setConnectStatus("Keine Verbindungsdaten vorhanden", true);
+        setOutput("Connect: keine Daten");
+        setStatus("Verbindungspruefung ohne Ergebnis", true);
+        return;
+      }
+
+      const summary = data.connected ? "Verbindung steht" : "Verbindung teilweise/fehlerhaft";
+      setConnectStatus(summary, !data.connected);
+      setOutput(lines.join("\n"));
+      setStatus(`Connect (${target}): ${summary}`, !data.connected);
+    }
+
+    function renderQueue(snapshot) {
+      const items = Array.isArray(snapshot.items) ? snapshot.items : [];
+      const current = snapshot.current || null;
+      const enabled = Boolean(snapshot.enabled);
+      const count = Number.isFinite(snapshot.count) ? snapshot.count : items.length;
+
+      if (queueBadgeEl) {
+        const currentName = current ? shortNameFromPath(current) : "-";
+        queueBadgeEl.textContent = `Queue: ${count} | Aktuell: ${currentName} | Mode: ${enabled ? "an" : "aus"}`;
+      }
+
+      if (!queueListEl) {
+        return;
+      }
+
+      const rows = [];
+      if (current) {
+        rows.push(`
+          <div class="list-item">
+            <span class="list-name">Aktuell: ${escapeHtml(shortNameFromPath(current))}</span>
+            <span class="list-meta">${escapeHtml(current)}</span>
+            <div class="list-actions">
+              <button class="mini-btn btn-secondary" data-action="use-path" data-path="${encodeURIComponent(current)}">In Feld</button>
+            </div>
+          </div>
+        `);
+      }
+
+      items.forEach((path, idx) => {
+        rows.push(`
+          <div class="list-item">
+            <span class="list-name">${idx + 1}. ${escapeHtml(shortNameFromPath(path))}</span>
+            <span class="list-meta">${escapeHtml(path)}</span>
+            <div class="list-actions">
+              <button class="mini-btn btn-secondary" data-action="use-path" data-path="${encodeURIComponent(path)}">In Feld</button>
+              <button class="mini-btn btn-primary" data-action="play-path" data-path="${encodeURIComponent(path)}">Direkt Play</button>
+            </div>
+          </div>
+        `);
+      });
+
+      if (rows.length === 0) {
+        queueListEl.innerHTML = `<div class="list-item"><span class="list-meta">Queue leer</span></div>`;
+        return;
+      }
+      queueListEl.innerHTML = rows.join("");
+    }
+
+    async function refreshQueue() {
+      const data = await api("/api/queue");
+      renderQueue(data);
+      return data;
+    }
+
+    async function queueAddPath(path) {
+      const targetPath = String(path || "").trim();
+      if (!targetPath) {
+        throw new Error("Pfad fuer Queue fehlt");
+      }
+      const data = await api("/api/queue/add", {
+        method: "POST",
+        body: JSON.stringify({ path: targetPath })
+      });
+      renderQueue(data);
+      setStatus("Zur Playlist hinzugefuegt");
+    }
+
+    async function queueAddFromInput() {
+      const path = $("path").value.trim();
+      if (!path) {
+        throw new Error("Pfad fehlt");
+      }
+      await queueAddPath(path);
+    }
+
+    async function queueStart() {
+      const data = await api("/api/queue/start", { method: "POST", body: "{}" });
+      renderQueue(data);
+      await refreshStreamStatus();
+      setStatus("Playlist gestartet");
+    }
+
+    async function queueNext() {
+      const data = await api("/api/queue/next", { method: "POST", body: "{}" });
+      renderQueue(data);
+      await refreshStreamStatus();
+      setStatus("Naechster Queue-Titel");
+    }
+
+    async function queueClear() {
+      const data = await api("/api/queue/clear", { method: "POST", body: "{}" });
+      renderQueue(data);
+      setStatus("Playlist geleert");
+    }
+
+    function applyPath(path) {
+      const targetPath = String(path || "").trim();
+      if (!targetPath) {
+        return;
+      }
+      $("path").value = targetPath;
+      setMediaHint(`Auswahl: ${shortNameFromPath(targetPath)}`);
+    }
+
+    function renderHistory(items) {
+      if (!historyListEl) {
+        return;
+      }
+      if (!Array.isArray(items) || items.length === 0) {
+        historyListEl.innerHTML = `<div class="list-item"><span class="list-meta">Noch keine Uploads</span></div>`;
+        return;
+      }
+      const rows = items.slice(0, 18).map((item) => {
+        const path = String(item.path || "");
+        const encoded = encodeURIComponent(path);
+        const filename = shortNameFromPath(item.filename || path);
+        const meta = `${item.media_type || "media"} | ${formatBytes(item.size)} | ${formatUploadTime(item.uploaded_at)}`;
+        return `
+          <div class="list-item">
+            <span class="list-name">${escapeHtml(filename)}</span>
+            <span class="list-meta">${escapeHtml(meta)}</span>
+            <div class="list-actions">
+              <button class="mini-btn btn-secondary" data-action="use-path" data-path="${encoded}">In Feld</button>
+              <button class="mini-btn btn-tertiary" data-action="queue-add" data-path="${encoded}">+ Queue</button>
+              <button class="mini-btn btn-primary" data-action="play-path" data-path="${encoded}">Play</button>
+            </div>
+          </div>
+        `;
+      });
+      historyListEl.innerHTML = rows.join("");
+    }
+
+    async function refreshHistory() {
+      const data = await api("/api/upload_history");
+      renderHistory(data.items || []);
+    }
+
+    async function refreshVolume() {
+      const data = await api("/api/volume");
+      if (typeof data.level === "number") {
+        const rounded = Math.round(data.level * 10) / 10;
+        $("volumeLabel").textContent = rounded.toString();
+        $("volumeSlider").value = Math.round(rounded).toString();
+        if (overviewVolumeEl) {
+          overviewVolumeEl.textContent = `${rounded}%`;
+        }
+      }
+      setStatus("Lautstaerke aktualisiert");
+    }
+
+    async function setVolume(level) {
+      const target = typeof level === "number"
+        ? level
+        : Number($("volumeSlider").value);
+
+      await api("/api/volume", {
+        method: "POST",
+        body: JSON.stringify({ level: target })
+      });
+      await refreshVolume();
+      setStatus(`Lautstaerke auf ${target}% gesetzt`);
+    }
+
+    async function play() {
+      const path = $("path").value.trim();
+      if (!path) {
+        throw new Error("Pfad fehlt");
+      }
+      await api("/api/play", {
+        method: "POST",
+        body: JSON.stringify({ path })
+      });
+      setStatus("Stream gestartet");
+      await refreshStreamStatus();
+      await refreshQueue();
+    }
+
+    async function uploadMediaFile(file) {
+      if (!file) {
+        throw new Error("keine Datei ausgewaehlt");
+      }
+
+      setStatus(`Upload startet: ${file.name}`);
+      setMediaHint(`Upload laeuft: ${file.name}`);
+
+      const response = await fetch("/api/upload_media", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "X-Filename": encodeURIComponent(file.name),
+        },
+        body: file,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok === false) {
+        throw new Error(data.error || `${response.status} ${response.statusText}`);
+      }
+
+      $("path").value = data.path;
+      const mb = (Number(data.size || 0) / (1024 * 1024)).toFixed(2);
+      setMediaHint(`${data.filename} (${mb} MB)`);
+      setOutput(`Upload ok\n${data.path}\n${data.size} bytes`);
+      setStatus(`Medien hinzugefuegt: ${data.filename}`);
+      await refreshHistory();
+    }
+
+    function chooseMediaFile() {
+      if (!mediaFileInputEl) {
+        throw new Error("Dateiauswahl nicht verfuegbar");
+      }
+      mediaFileInputEl.click();
+    }
+
+    async function stop() {
+      await api("/api/stop", { method: "POST", body: "{}" });
+      setStatus("Stop gesendet");
+      await refreshStreamStatus();
+      await refreshQueue();
+    }
+
+    async function refreshPlaying() {
+      const data = await api("/api/playing");
+      const parsed = data.parsed || {};
+      const media = parsed["Media type"] || "Unknown";
+      const state = parsed["Device state"] || "Unknown";
+      const pos = parsed["Position"] || "-";
+      if (overviewStateEl) {
+        overviewStateEl.textContent = state;
+      }
+      setOutput(data.raw || "");
+      setStatus(`Media=${media}, State=${state}, Position=${pos}`);
+    }
+
+    async function refreshStreamStatus() {
+      const data = await api("/api/stream_status");
+      $("streamFlag").textContent = data.active ? "aktiv" : "inaktiv";
+      $("streamFlag").className = data.active ? "ok" : "bad";
+      if (overviewStreamEl) {
+        overviewStreamEl.textContent = data.active ? "aktiv" : "inaktiv";
+      }
+    }
+
+    async function refreshScreenStatus() {
+      const data = await api("/api/screen_status");
+      const active = Boolean(data.active);
+
+      if (active) {
+        setScreenStatus(`Aktiv: ${data.url || "-"}`);
+      } else if (data.last_error) {
+        setScreenStatus(`Inaktiv: ${data.last_error}`, true);
+      } else {
+        setScreenStatus("Screen-Stream: inaktiv");
+      }
+      return data;
+    }
+
+    async function startScreenStream() {
+      const payload = {};
+      const display = $("screenDisplay").value.trim();
+      const size = $("screenSize").value.trim();
+      const fps = $("screenFps").value.trim();
+      if (display) {
+        payload.display = display;
+      }
+      if (size) {
+        payload.size = size;
+      }
+      if (fps) {
+        payload.fps = fps;
+      }
+
+      const data = await api("/api/screen_start", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const lines = [
+        "Bildschirmstream gestartet",
+        `URL: ${data.url || "-"}`,
+        `Display: ${data.display || "-"}`,
+        `Size/FPS: ${data.size || "-"} @ ${data.fps || "-"}`,
+      ];
+      if (data.launch_stdout) {
+        lines.push(data.launch_stdout);
+      }
+      if (data.launch_stderr) {
+        lines.push(data.launch_stderr);
+      }
+      if (data.launch_warning) {
+        lines.push(`WARNUNG: ${data.launch_warning}`);
+      }
+      setOutput(lines.join("\n"));
+      setStatus(
+        data.launch_warning
+          ? "Bildschirmstream gestartet (mit Apple-TV Warnung)"
+          : "Bildschirmstream auf Apple TV gestartet"
+      );
+      await refreshScreenStatus();
+    }
+
+    async function stopScreenStream() {
+      const data = await api("/api/screen_stop", { method: "POST", body: "{}" });
+      const tvInfo = data.tv_returncode === 0
+        ? "Apple TV stop gesendet"
+        : (data.tv_stderr || data.tv_stdout || "Apple TV stop Rueckmeldung fehlt");
+      setOutput(["Bildschirmstream gestoppt", tvInfo].join("\n"));
+      setStatus("Bildschirmstream gestoppt");
+      await refreshScreenStatus();
+    }
+
+    async function openSystemMirror() {
+      const data = await api("/api/open_system_mirror", { method: "POST", body: "{}" });
+      setOutput(
+        [
+          "System-Mirroring geoeffnet",
+          `PID: ${data.pid || "-"}`,
+          `Display: ${data.display || "-"}`,
+          `Command: ${(data.command || []).join(" ")}`,
+        ].join("\n")
+      );
+      setStatus("System-Mirroring gestartet");
+    }
+
+    async function stepVolume(delta) {
+      const current = Number($("volumeSlider").value || "0");
+      const next = Math.max(0, Math.min(100, current + delta));
+      $("volumeSlider").value = next.toString();
+      await setVolume(next);
+    }
+
+    async function remote(action) {
+      const data = await api("/api/remote", {
+        method: "POST",
+        body: JSON.stringify({ action })
+      });
+      const text = [data.stdout || "", data.stderr || ""].filter(Boolean).join("\n");
+      setOutput(text);
+      setStatus(`Remote action: ${action}`);
+    }
+
+    async function showFeatures() {
+      const data = await api("/api/features");
+      setOutput(data.raw || "");
+      setStatus("Features geladen");
+    }
+
+    async function showDeviceInfo() {
+      const data = await api("/api/device_info");
+      setOutput(data.raw || "");
+      setStatus("Device Info geladen");
+    }
+
+    async function scanDevices() {
+      const data = await api("/api/scan");
+      setOutput(data.raw || "");
+      setStatus("Scan abgeschlossen");
+    }
+
+    async function runRawCommand() {
+      const command = $("rawCommand").value.trim();
+      if (!command) {
+        throw new Error("command fehlt");
+      }
+      const data = await api("/api/command", {
+        method: "POST",
+        body: JSON.stringify({ command })
+      });
+      const text = [data.stdout || "", data.stderr || ""].filter(Boolean).join("\n");
+      setOutput(text);
+      setStatus(`Command ausgefuehrt: ${command}`);
+    }
+
+    async function openService(key) {
+      const service = SERVICE_MAP[key];
+      if (!service) {
+        throw new Error("unbekannter Service");
+      }
+      const data = await api("/api/service_launch", {
+        method: "POST",
+        body: JSON.stringify({ service: key })
+      });
+      const text = [
+        `${data.label} -> ${data.target_name} (${data.target_ip})`,
+        `bundle: ${data.bundle_id}`,
+        data.stdout || "",
+        data.stderr || ""
+      ].filter(Boolean).join("\n");
+      setOutput(text);
+      setStatus(`${data.label} wurde auf Apple TV gestartet`);
+    }
+
+    function voiceNumberFromText(text) {
+      const match = text.match(/\b(?:lautstaerke|volume)\s+(\d{1,3})\b/);
+      if (!match) {
+        return null;
+      }
+      const level = Number(match[1]);
+      if (!Number.isFinite(level)) {
+        return null;
+      }
+      return Math.max(0, Math.min(100, level));
+    }
+
+    async function executeVoiceCommand(raw) {
+      const command = raw.trim().toLowerCase();
+      if (!command) {
+        return;
+      }
+
+      setVoiceStatus(`Erkannt: ${command}`, true);
+
+      const fixedLevel = voiceNumberFromText(command);
+      if (fixedLevel !== null) {
+        $("volumeSlider").value = String(fixedLevel);
+        await setVolume(fixedLevel);
+        return;
+      }
+
+      if (command.includes("spotify")) {
+        await openService("spotify");
+        return;
+      }
+      if (command.includes("musik")) {
+        await openService("spotify");
+        return;
+      }
+      if (command.includes("netflix")) {
+        await openService("netflix");
+        return;
+      }
+      if (command.includes("amazon")) {
+        await openService("amazon");
+        return;
+      }
+      if (command.includes("joyn")) {
+        await openService("joyn");
+        return;
+      }
+      if (command.includes("lauter")) {
+        await remote("volume_up");
+        await refreshVolume();
+        return;
+      }
+      if (command.includes("leiser")) {
+        await remote("volume_down");
+        await refreshVolume();
+        return;
+      }
+      if (command.includes("status")) {
+        await refreshPlaying();
+        await refreshVolume();
+        await refreshScreenStatus();
+        return;
+      }
+      if (command.includes("bildschirm start") || command.includes("screen start")) {
+        await startScreenStream();
+        return;
+      }
+      if (command.includes("bildschirm stop") || command.includes("screen stop")) {
+        await stopScreenStream();
+        return;
+      }
+      if (command.includes("bildschirm spiegeln") || command.includes("system mirror")) {
+        await openSystemMirror();
+        return;
+      }
+      if (command.includes("stop")) {
+        await stop();
+        return;
+      }
+      if (command.includes("pause")) {
+        await remote("pause");
+        return;
+      }
+      if (command.includes("play")) {
+        await remote("play");
+        return;
+      }
+      if (command.includes("scan")) {
+        await scanDevices();
+        return;
+      }
+
+      setOutput(`Voice: kein Mapping fuer "${command}"`);
+      setStatus(`Voice unbekannt: ${command}`, true);
+    }
+
+    function ensureVoiceRecognition() {
+      if (voiceRecognition) {
+        return true;
+      }
+      if (!SpeechRecognitionCtor) {
+        setVoiceStatus("Sprachsteuerung: Browser unterstuetzt SpeechRecognition nicht", false);
+        return false;
+      }
+
+      voiceRecognition = new SpeechRecognitionCtor();
+      voiceRecognition.lang = "de-DE";
+      voiceRecognition.interimResults = false;
+      voiceRecognition.continuous = true;
+      voiceRecognition.maxAlternatives = 1;
+
+      voiceRecognition.onstart = () => {
+        setVoiceStatus("Sprachsteuerung: aktiv", true);
+      };
+
+      voiceRecognition.onend = () => {
+        if (voiceEnabled) {
+          try {
+            voiceRecognition.start();
+          } catch (_error) {
+            setVoiceStatus("Sprachsteuerung: Neustart fehlgeschlagen", false);
+          }
+          return;
+        }
+        setVoiceStatus("Sprachsteuerung: inaktiv", false);
+      };
+
+      voiceRecognition.onerror = (event) => {
+        setVoiceStatus(`Sprachsteuerung Fehler: ${event.error}`, false);
+      };
+
+      voiceRecognition.onresult = (event) => {
+        const index = event.resultIndex;
+        const transcript = event.results[index][0].transcript || "";
+        run(() => executeVoiceCommand(transcript));
+      };
+
+      return true;
+    }
+
+    function toggleVoice() {
+      if (!ensureVoiceRecognition()) {
+        return;
+      }
+
+      voiceEnabled = !voiceEnabled;
+      if (voiceEnabled) {
+        try {
+          voiceRecognition.start();
+          setVoiceStatus("Sprachsteuerung: startet...", true);
+        } catch (error) {
+          voiceEnabled = false;
+          setVoiceStatus(`Sprachsteuerung Fehler: ${error.message || String(error)}`, false);
+        }
+        return;
+      }
+
+      try {
+        voiceRecognition.stop();
+      } catch (_error) {
+        setVoiceStatus("Sprachsteuerung: inaktiv", false);
+      }
+    }
+
+    function showVoiceHelp() {
+      setOutput(
+        [
+          "Voice Befehle:",
+          "- play / pause / stop",
+          "- lauter / leiser",
+          "- lautstaerke 35",
+          "- status",
+          "- musik / spotify / netflix / amazon / joyn",
+          "- bildschirm start / bildschirm stop",
+          "- scan",
+        ].join("\n")
+      );
+      setStatus("Voice Hilfe angezeigt");
+    }
+
+    async function run(action) {
+      try {
+        await action();
+      } catch (error) {
+        setStatus(error.message || String(error), true);
+      }
+    }
+
+    $("saveConfig").addEventListener("click", () => run(saveConfig));
+    $("reloadConfig").addEventListener("click", () => run(loadConfig));
+    $("connectHomepod").addEventListener("click", () => run(() => connectTarget("homepod")));
+    $("connectAppleTV").addEventListener("click", () => run(() => connectTarget("appletv")));
+    $("connectAll").addEventListener("click", () => run(() => connectTarget("all")));
+    $("addMedia").addEventListener("click", () => run(chooseMediaFile));
+    $("queueAdd").addEventListener("click", () => run(queueAddFromInput));
+    $("queueStart").addEventListener("click", () => run(queueStart));
+    $("queueNext").addEventListener("click", () => run(queueNext));
+    $("queueClear").addEventListener("click", () => run(queueClear));
+    $("setVolume").addEventListener("click", () => run(() => setVolume()));
+    $("volDown").addEventListener("click", () => run(() => stepVolume(-5)));
+    $("volUp").addEventListener("click", () => run(() => stepVolume(5)));
+    $("refreshVolume").addEventListener("click", () => run(refreshVolume));
+    $("play").addEventListener("click", () => run(play));
+    $("stop").addEventListener("click", () => run(stop));
+    $("refreshPlaying").addEventListener("click", () => run(refreshPlaying));
+    $("rPlayPause").addEventListener("click", () => run(() => remote("play_pause")));
+    $("rPlay").addEventListener("click", () => run(() => remote("play")));
+    $("rPause").addEventListener("click", () => run(() => remote("pause")));
+    $("rStop").addEventListener("click", () => run(() => remote("stop")));
+    $("rPrev").addEventListener("click", () => run(() => remote("previous")));
+    $("rNext").addEventListener("click", () => run(() => remote("next")));
+    $("rSkipBack").addEventListener("click", () => run(() => remote("skip_backward")));
+    $("rSkipFwd").addEventListener("click", () => run(() => remote("skip_forward")));
+    $("rMenu").addEventListener("click", () => run(() => remote("menu")));
+    $("rHome").addEventListener("click", () => run(() => remote("home")));
+    $("rVolUp").addEventListener("click", () => run(() => remote("volume_up")));
+    $("rVolDown").addEventListener("click", () => run(() => remote("volume_down")));
+    $("showFeatures").addEventListener("click", () => run(showFeatures));
+    $("showDeviceInfo").addEventListener("click", () => run(showDeviceInfo));
+    $("scanDevices").addEventListener("click", () => run(scanDevices));
+    $("runRawCommand").addEventListener("click", () => run(runRawCommand));
+    $("svcNetflix").addEventListener("click", () => run(() => openService("netflix")));
+    $("svcAmazon").addEventListener("click", () => run(() => openService("amazon")));
+    $("svcJoyn").addEventListener("click", () => run(() => openService("joyn")));
+    $("svcSpotify").addEventListener("click", () => run(() => openService("spotify")));
+    $("saveTvConfig").addEventListener("click", () => run(saveTVConfig));
+    $("reloadTvConfig").addEventListener("click", () => run(loadTVConfig));
+    $("screenStart").addEventListener("click", () => run(startScreenStream));
+    $("screenStop").addEventListener("click", () => run(stopScreenStream));
+    $("screenRefresh").addEventListener("click", () => run(refreshScreenStatus));
+    $("systemMirrorOpen").addEventListener("click", () => run(openSystemMirror));
+    $("voiceToggle").addEventListener("click", () => toggleVoice());
+    $("voiceHelp").addEventListener("click", () => run(showVoiceHelp));
+    if (mediaFileInputEl) {
+      mediaFileInputEl.addEventListener("change", () => {
+        const file = mediaFileInputEl.files && mediaFileInputEl.files[0] ? mediaFileInputEl.files[0] : null;
+        run(() => uploadMediaFile(file));
+        mediaFileInputEl.value = "";
+      });
+    }
+    if (historyListEl) {
+      historyListEl.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) {
+          return;
+        }
+        const action = button.dataset.action || "";
+        const encodedPath = button.dataset.path || "";
+        const path = decodeURIComponent(encodedPath);
+        if (action === "use-path") {
+          applyPath(path);
+          setStatus("Pfad aus Historie uebernommen");
+          return;
+        }
+        if (action === "queue-add") {
+          run(() => queueAddPath(path));
+          return;
+        }
+        if (action === "play-path") {
+          applyPath(path);
+          run(play);
+        }
+      });
+    }
+    if (queueListEl) {
+      queueListEl.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) {
+          return;
+        }
+        const action = button.dataset.action || "";
+        const encodedPath = button.dataset.path || "";
+        const path = decodeURIComponent(encodedPath);
+        if (action === "use-path") {
+          applyPath(path);
+          setStatus("Pfad aus Playlist uebernommen");
+          return;
+        }
+        if (action === "play-path") {
+          applyPath(path);
+          run(play);
+        }
+      });
+    }
+
+    (async () => {
+      $("screenDisplay").value = ":0.0";
+      $("screenSize").value = "1280x720";
+      $("screenFps").value = "22";
+      await run(loadConfig);
+      await run(loadTVConfig);
+      await run(() => connectTarget("all"));
+      await run(refreshHistory);
+      await run(refreshQueue);
+      await run(refreshVolume);
+      await run(refreshStreamStatus);
+      await run(refreshScreenStatus);
+      await run(refreshPlaying);
+      setVoiceStatus("Sprachsteuerung: inaktiv", false);
+      setOutput("Bereit fuer atvremote-Kommandos.");
+      setInterval(() => run(refreshStreamStatus), 4000);
+      setInterval(() => run(refreshScreenStatus), 6000);
+      setInterval(() => run(refreshPlaying), 12000);
+      setInterval(() => run(refreshQueue), 4500);
+    })();
+  </script>
+</body>
+</html>
