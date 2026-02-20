@@ -27,6 +27,12 @@ python3 app.py
 
 Hinweis: `DEINE_HOMEPOD_IP` und `DEINE_APPLETV_IP` sind nur Platzhalter. Bitte durch die echten IP-Adressen deiner Geraete ersetzen.
 
+## Hinweis zu Marken und Nutzung
+
+- `Apple`, `HomePod`, `Apple TV`, `AirPlay` und App-Namen wie `Netflix`, `Amazon`, `Spotify` sind Marken ihrer jeweiligen Inhaber.
+- Dieses Projekt ist ein inoffizielles Community-Tool und steht in keiner Verbindung zu Apple.
+- Nutze das Tool nur mit deinen eigenen Geraeten, in deinem eigenen Netzwerk und im Rahmen der jeweils gueltigen Nutzungsbedingungen.
+
 ## Funktionen
 
 - HomePod-IP und Name speichern
