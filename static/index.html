@@ -266,7 +266,7 @@
     }
 
     .card:hover {
-      transform: translateY(-4px) rotateX(1.5deg);
+      transform: none;
       border-color: rgba(21, 246, 255, 0.45);
       box-shadow:
         0 22px 52px rgba(0, 0, 0, 0.55),
@@ -363,6 +363,15 @@
       min-height: 48px;
       font-size: 0.82rem;
       line-height: 1.35;
+    }
+
+    .voice-debug {
+      margin-top: 8px;
+      min-height: 64px;
+      font-size: 0.78rem;
+      line-height: 1.3;
+      white-space: pre-line;
+      color: #9cb0d8;
     }
 
     .voice-live {
@@ -469,7 +478,6 @@
     }
 
     button:hover {
-      transform: translateY(-2px);
       border-color: rgba(21, 246, 255, 0.8);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.28),
@@ -481,10 +489,6 @@
 
     button:hover::after {
       left: 115%;
-    }
-
-    button:active {
-      transform: translateY(0);
     }
 
     button:focus-visible {
@@ -641,6 +645,250 @@
       text-shadow: 0 0 12px rgba(255, 94, 126, 0.35);
     }
 
+    .hidden {
+      display: none !important;
+    }
+
+    .remote-card .card-sub {
+      margin-bottom: 14px;
+    }
+
+    .remote-shell {
+      position: relative;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background:
+        radial-gradient(120% 140% at 18% 10%, rgba(124, 255, 107, 0.1), transparent 55%),
+        radial-gradient(130% 140% at 90% 10%, rgba(255, 61, 255, 0.14), transparent 56%),
+        linear-gradient(180deg, rgba(12, 18, 42, 0.95), rgba(8, 13, 30, 0.95));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 18px 35px rgba(0, 0, 0, 0.45);
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .remote-shell::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 62px;
+      bottom: 8px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(4, 8, 18, 0.94), rgba(1, 3, 10, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -20px 30px rgba(0, 0, 0, 0.45),
+        0 12px 24px rgba(0, 0, 0, 0.34);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .remote-top {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .device-tab {
+      min-height: 42px;
+      border-radius: 999px;
+      text-transform: none;
+      letter-spacing: 0.03em;
+      font-size: 0.8rem;
+      background:
+        radial-gradient(120% 140% at 20% 18%, rgba(255, 255, 255, 0.16), transparent 46%),
+        linear-gradient(140deg, rgba(51, 67, 104, 0.9), rgba(15, 23, 41, 0.95));
+      color: #d7e8ff;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .device-tab.is-active {
+      border-color: rgba(118, 252, 255, 0.95);
+      color: #041120;
+      background:
+        radial-gradient(130% 140% at 20% 18%, rgba(255, 255, 255, 0.45), transparent 48%),
+        linear-gradient(140deg, rgba(127, 249, 255, 0.95), rgba(111, 193, 255, 0.95));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 18px rgba(127, 249, 255, 0.34);
+    }
+
+    .power-dot {
+      min-width: 84px;
+      min-height: 42px;
+      border-radius: 999px;
+      text-transform: none;
+      letter-spacing: 0.04em;
+      font-size: 0.8rem;
+      padding-inline: 12px;
+    }
+
+    .remote-body {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+    }
+
+    .remote-pad {
+      margin: 0 auto;
+      width: min(340px, 100%);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      position: relative;
+      background:
+        radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.22), transparent 45%),
+        linear-gradient(160deg, rgba(43, 57, 92, 0.9), rgba(9, 16, 35, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow:
+        inset 0 -10px 22px rgba(0, 0, 0, 0.5),
+        inset 0 8px 16px rgba(255, 255, 255, 0.08),
+        0 18px 28px rgba(0, 0, 0, 0.42);
+    }
+
+    .pad-btn {
+      position: absolute;
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      min-height: 82px;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 1.55rem;
+      font-weight: 700;
+      padding: 0;
+      color: #f3f8ff;
+      background:
+        radial-gradient(120% 120% at 20% 16%, rgba(255, 255, 255, 0.2), transparent 46%),
+        linear-gradient(150deg, rgba(80, 98, 139, 0.82), rgba(20, 31, 55, 0.96));
+      border-color: rgba(255, 255, 255, 0.26);
+    }
+
+    .pad-btn-up {
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .pad-btn-down {
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .pad-btn-left {
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .pad-btn-right {
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .pad-btn-center {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 108px;
+      height: 108px;
+      min-height: 108px;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-color: rgba(124, 255, 107, 0.6);
+      background:
+        radial-gradient(130% 130% at 30% 22%, rgba(255, 255, 255, 0.3), transparent 46%),
+        linear-gradient(150deg, rgba(124, 255, 107, 0.7), rgba(20, 74, 37, 0.95));
+      color: #0a1d09;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.48),
+        0 12px 20px rgba(0, 0, 0, 0.35),
+        0 0 18px rgba(124, 255, 107, 0.35);
+    }
+
+    .remote-media-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .remote-media-row button {
+      min-height: 44px;
+      border-radius: 14px;
+      text-transform: none;
+      letter-spacing: 0.03em;
+      font-size: 0.82rem;
+    }
+
+    .remote-volume-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .remote-tv-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .remote-tv-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .remote-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .app-tile {
+      min-height: 72px;
+      border-radius: 16px;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 8px;
+    }
+
+    .app-netflix {
+      background: linear-gradient(145deg, rgba(229, 9, 20, 0.95), rgba(114, 7, 13, 0.95));
+      border-color: rgba(255, 140, 149, 0.72);
+    }
+
+    .app-amazon {
+      background: linear-gradient(145deg, rgba(35, 122, 238, 0.95), rgba(20, 71, 140, 0.95));
+      border-color: rgba(149, 201, 255, 0.62);
+    }
+
+    .app-joyn {
+      background: linear-gradient(145deg, rgba(255, 56, 194, 0.92), rgba(150, 30, 126, 0.95));
+      border-color: rgba(255, 158, 227, 0.66);
+    }
+
+    .app-spotify {
+      background: linear-gradient(145deg, rgba(34, 197, 94, 0.95), rgba(21, 113, 60, 0.95));
+      border-color: rgba(148, 255, 192, 0.62);
+    }
+
+    .app-voice {
+      background: linear-gradient(145deg, rgba(154, 87, 255, 0.95), rgba(83, 44, 147, 0.95));
+      border-color: rgba(203, 169, 255, 0.66);
+    }
+
     @media (max-width: 680px) {
       .wrap {
         padding: 16px 12px 24px;
@@ -677,6 +925,22 @@
       .btn-row {
         grid-template-columns: 1fr;
       }
+
+      .remote-top {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .power-dot {
+        grid-column: 1 / -1;
+      }
+
+      .remote-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .remote-media-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
   </style>
 </head>
@@ -684,9 +948,9 @@
   <main class="wrap">
     <header class="head">
       <div class="brand-panel">
-        <div class="brand-line">AIDRAX // Neon Cyberpunk 3D</div>
-        <h1 class="title">HomePod Control Node</h1>
-        <p class="sub">Steuerung fuer Lautstaerke, Stream, ATV Remote und Diagnostik ueber <code>atvremote</code>.</p>
+        <div class="brand-line">APPLE TV + HOMEPOD // REMOTE DESIGN</div>
+        <h1 class="title">Remote Control Studio</h1>
+        <p class="sub">Design aus deiner <code>.make</code>-Datei uebernommen: Device-Switch, D-Pad, Quick Actions und volle API-Anbindung.</p>
         <div class="head-pills">
           <span class="head-pill">AirPlay</span>
           <span class="head-pill">RAOP</span>
@@ -764,34 +1028,61 @@
           </div>
         </article>
 
-        <article class="card">
-          <h2>ATV Remote</h2>
-          <p class="card-sub">Direkte Fernbedienung in logischen Gruppen.</p>
-          <div class="control-group">
-            <p class="control-title">Transport</p>
-            <div class="row btn-row">
-              <button id="rPlayPause" class="btn-primary">Play/Pause</button>
-              <button id="rPlay" class="btn-tertiary">Play</button>
-              <button id="rPause" class="btn-tertiary">Pause</button>
-              <button id="rStop" class="btn-danger">Stop</button>
+        <article class="card remote-card">
+          <h2>Remote</h2>
+          <p class="card-sub">Apple TV / HomePod Layout aus dem Design-Entwurf mit direkter Steuerung.</p>
+          <div class="remote-shell">
+            <div class="remote-top">
+              <button id="deviceAppleTV" class="device-tab is-active">Apple TV</button>
+              <button id="deviceHomePod" class="device-tab">HomePod</button>
+              <button id="rStop" class="power-dot btn-danger">Stop</button>
             </div>
-          </div>
-          <div class="control-group">
-            <p class="control-title">Navigation</p>
-            <div class="row btn-row">
-              <button id="rPrev" class="btn-secondary">Prev</button>
-              <button id="rNext" class="btn-secondary">Next</button>
-              <button id="rSkipBack" class="btn-secondary">Skip -</button>
-              <button id="rSkipFwd" class="btn-secondary">Skip +</button>
-              <button id="rMenu" class="btn-secondary">Menu</button>
-              <button id="rHome" class="btn-secondary">Home</button>
-            </div>
-          </div>
-          <div class="control-group">
-            <p class="control-title">Volume Step</p>
-            <div class="row btn-row">
-              <button id="rVolUp" class="btn-tertiary">Vol +</button>
-              <button id="rVolDown" class="btn-tertiary">Vol -</button>
+
+            <div class="remote-body">
+              <div class="remote-pad tv-only">
+                <button id="rUp" class="pad-btn pad-btn-up" title="Up">▲</button>
+                <button id="rDown" class="pad-btn pad-btn-down" title="Down">▼</button>
+                <button id="rLeft" class="pad-btn pad-btn-left" title="Left">◀</button>
+                <button id="rRight" class="pad-btn pad-btn-right" title="Right">▶</button>
+                <button id="rPlayPause" class="pad-btn pad-btn-center" title="Bestaetigen">OK</button>
+              </div>
+
+              <div class="remote-media-row">
+                <button id="rPrev" class="btn-secondary">Prev</button>
+                <button id="rPlay" class="btn-tertiary">Play</button>
+                <button id="rPause" class="btn-tertiary">Pause</button>
+                <button id="rNext" class="btn-secondary">Next</button>
+              </div>
+
+              <div class="remote-media-row">
+                <button id="rSkipBack" class="btn-secondary">Skip -</button>
+                <button id="rSkipFwd" class="btn-secondary">Skip +</button>
+                <button id="rVolDown" class="btn-tertiary">Vol -</button>
+                <button id="rVolUp" class="btn-tertiary">Vol +</button>
+              </div>
+
+              <div class="remote-tv-row-3 tv-only">
+                <button id="rBackExit" class="btn-secondary">Zurueck</button>
+                <button id="rMenu" class="btn-secondary">Menu</button>
+                <button id="rHome" class="btn-secondary">Home</button>
+              </div>
+              <div class="remote-tv-row tv-only">
+                <button id="rTopMenu" class="btn-secondary">Top Menu</button>
+                <button id="rControlCenter" class="btn-secondary">Control Center</button>
+              </div>
+
+              <div class="remote-actions">
+                <button id="svcNetflix" class="app-tile app-netflix">Netflix</button>
+                <button id="svcAmazon" class="app-tile app-amazon">Amazon</button>
+                <button id="svcJoyn" class="app-tile app-joyn">Joyn</button>
+                <button id="svcSpotify" class="app-tile app-spotify">Spotify</button>
+                <button id="voiceToggle" class="app-tile app-voice">Voice Start</button>
+                <button id="voiceHelp" class="app-tile btn-secondary">Befehle</button>
+              </div>
+
+              <div id="voiceStatus" class="status voice-status voice-idle">Sprachsteuerung: inaktiv</div>
+              <div id="voiceIntentDebug" class="status voice-debug">Voice Diagnose: -</div>
+              <div class="pill">Tastatur: Pfeile = Navigation, Enter = OK</div>
             </div>
           </div>
         </article>
@@ -809,9 +1100,9 @@
           <h2>Geraet</h2>
           <p class="card-sub">Verbindungsziel fuer alle Kommandos.</p>
           <label for="ip">IP</label>
-          <input id="ip" type="text" placeholder="192.168.x.x">
+          <input id="ip" type="text" placeholder="HomePod IP-Adresse">
           <label for="name" style="margin-top:8px;">Name</label>
-          <input id="name" type="text" placeholder="Wohnzimmer">
+          <input id="name" type="text" placeholder="HomePod">
           <div class="row btn-row">
             <button id="saveConfig" class="btn-primary">Speichern</button>
             <button id="reloadConfig" class="btn-secondary">Neu laden</button>
@@ -858,27 +1149,19 @@
         </article>
 
         <article class="card">
-          <h2>Dienste & Sprachsteuerung</h2>
-          <p class="card-sub">Apps werden direkt auf Apple TV gestartet (kein Web-Fallback).</p>
+          <h2>Apple TV Ziel</h2>
+          <p class="card-sub">Zielgeraet fuer Service-Launch, Remote und Bildschirmstream.</p>
           <label for="tvIp">Apple TV IP</label>
-          <input id="tvIp" type="text" placeholder="192.168.x.x">
+          <input id="tvIp" type="text" placeholder="Apple TV IP-Adresse">
           <label for="tvName" style="margin-top:8px;">Apple TV Name</label>
-          <input id="tvName" type="text" placeholder="Maddin">
+          <input id="tvName" type="text" placeholder="Apple TV">
           <div class="row btn-row">
             <button id="saveTvConfig" class="btn-primary">TV speichern</button>
             <button id="reloadTvConfig" class="btn-secondary">TV laden</button>
           </div>
-          <div class="service-grid">
-            <button id="svcNetflix" class="service-btn btn-secondary">Netflix</button>
-            <button id="svcAmazon" class="service-btn btn-secondary">Amazon</button>
-            <button id="svcJoyn" class="service-btn btn-secondary">Joyn</button>
-            <button id="svcSpotify" class="service-btn btn-secondary">Spotify</button>
+          <div class="row">
+            <span class="pill">Services und Voice sind direkt im Remote-Bereich</span>
           </div>
-          <div class="row btn-row">
-            <button id="voiceToggle" class="btn-tertiary">Voice Start</button>
-            <button id="voiceHelp" class="btn-secondary">Befehle</button>
-          </div>
-          <div id="voiceStatus" class="status voice-status voice-idle">Sprachsteuerung: inaktiv</div>
         </article>
 
         <article class="card">
@@ -927,7 +1210,10 @@
     const historyListEl = $("historyList");
     const mediaFileInputEl = $("mediaFileInput");
     const voiceStatusEl = $("voiceStatus");
+    const voiceIntentDebugEl = $("voiceIntentDebug");
     const voiceToggleBtn = $("voiceToggle");
+    const deviceAppleTVBtn = $("deviceAppleTV");
+    const deviceHomePodBtn = $("deviceHomePod");
     const screenStatusEl = $("screenStatus");
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
@@ -938,8 +1224,148 @@
       spotify: { label: "Spotify" }
     };
 
+    const VOICE_SERVICE_ALIASES = {
+      netflix: ["netflix", "net flix"],
+      amazon: ["amazon", "prime", "prime video", "primevideo", "prime tv", "prime-tv"],
+      joyn: ["joyn", "join", "joinn", "joint"],
+      spotify: ["spotify", "spoti", "spoti fy", "musik"]
+    };
+
+    const VOICE_LEARN_STORAGE_KEY = "homepod.voice.learning.v1";
+    const VOICE_LEARN_MIN_SCORE = 0.74;
+    const VOICE_COMMAND_KEYWORDS = [
+      "starte",
+      "starten",
+      "oeffne",
+      "oeffnen",
+      "offne",
+      "offnen",
+      "wechsel",
+      "zu",
+      "auf",
+      "gehe",
+      "spiel",
+      "spiele",
+      "spielt",
+      "mach",
+      "mache",
+      "lautstaerke",
+      "lautstarke",
+      "volume",
+      "lauter",
+      "leiser",
+      "zurueck",
+      "zuruck",
+      "menue",
+      "menu",
+      "verlassen",
+      "kontrollzentrum",
+      "control",
+      "center",
+      "airplay",
+      "top",
+      "status",
+      "bildschirm",
+      "screen",
+      "start",
+      "stop",
+      "spiegeln",
+      "system",
+      "mirror",
+      "pause",
+      "play",
+      "scan",
+      "musik",
+      "bitte",
+      "voice",
+      "reset",
+      "sprache",
+      "lernen",
+      "loeschen",
+      "verbinde",
+      "verbinden",
+      "schaue",
+      "schau",
+      "sehen",
+      "weiter",
+      "fortsetzen",
+      "naechster",
+      "homepod",
+      "appletv",
+      "apple",
+      "tv",
+      "beide"
+    ];
+
+    const VOICE_FILLER_WORDS = new Set([
+      "bitte",
+      "mal",
+      "einmal",
+      "doch",
+      "jetzt",
+      "gerne",
+      "irgendwie",
+      "kannst",
+      "koenntest",
+      "kann",
+      "du",
+      "mir",
+      "denn",
+      "die",
+      "das",
+      "der",
+      "ein",
+      "eine",
+      "den",
+      "dem",
+      "zum",
+      "zur"
+    ]);
+
+    const VOICE_UNIT_NUMBERS = {
+      zero: 0,
+      eins: 1,
+      ein: 1,
+      eine: 1,
+      einer: 1,
+      zwei: 2,
+      zwo: 2,
+      drei: 3,
+      vier: 4,
+      fuenf: 5,
+      sechs: 6,
+      sieben: 7,
+      acht: 8,
+      neun: 9,
+      zehn: 10,
+      elf: 11,
+      zwoelf: 12,
+      dreizehn: 13,
+      vierzehn: 14,
+      fuenfzehn: 15,
+      sechzehn: 16,
+      siebzehn: 17,
+      achtzehn: 18,
+      neunzehn: 19
+    };
+
+    const VOICE_TENS_NUMBERS = {
+      zwanzig: 20,
+      dreissig: 30,
+      vierzig: 40,
+      fuenfzig: 50,
+      sechzig: 60,
+      siebzig: 70,
+      achtzig: 80,
+      neunzig: 90,
+      hundert: 100
+    };
+
     let voiceRecognition = null;
     let voiceEnabled = false;
+    let remoteMode = "appletv";
+    let voiceKnownWords = null;
+    let voiceLearning = loadVoiceLearning();
 
     function setStatus(message, isError = false) {
       statusEl.innerHTML = isError
@@ -962,6 +1388,64 @@
       if (voiceToggleBtn) {
         voiceToggleBtn.classList.toggle("mic-active", active);
         voiceToggleBtn.textContent = active ? "Voice Stop" : "Voice Start";
+      }
+    }
+
+    function describeVoiceIntent(intent) {
+      if (!intent || !intent.type) {
+        return "unknown";
+      }
+      if (intent.type === "open_service") {
+        return `open_service(${intent.key})`;
+      }
+      if (intent.type === "set_volume") {
+        return `set_volume(${intent.level})`;
+      }
+      if (intent.type === "step_volume") {
+        return `step_volume(${intent.delta})`;
+      }
+      if (intent.type === "remote") {
+        const suffix = intent.target ? `,${intent.target}` : "";
+        return `remote(${intent.action}${suffix})`;
+      }
+      if (intent.type === "connect") {
+        return `connect(${intent.target || "all"})`;
+      }
+      return intent.type;
+    }
+
+    function setVoiceIntentDebug(candidate, segments, intents, recognized = null) {
+      if (!voiceIntentDebugEl) {
+        return;
+      }
+      const segmentList = (segments || []).length ? segments.join(" | ") : "-";
+      const intentList = (intents || []).length
+        ? intents.map((intent) => describeVoiceIntent(intent)).join(" | ")
+        : "-";
+      const resultText = recognized === null ? "-"
+        : (recognized ? "recognized" : "unrecognized");
+      const lines = [
+        `Voice Diagnose`,
+        `Adapted: ${candidate?.adapted || "-"}`,
+        `Segmente: ${segmentList}`,
+        `Intents: ${intentList}`,
+        `Result: ${resultText}`
+      ];
+      voiceIntentDebugEl.textContent = lines.join("\n");
+    }
+
+    function setRemoteMode(mode) {
+      remoteMode = mode === "homepod" ? "homepod" : "appletv";
+
+      document.querySelectorAll(".tv-only").forEach((el) => {
+        el.classList.toggle("hidden", remoteMode !== "appletv");
+      });
+
+      if (deviceAppleTVBtn) {
+        deviceAppleTVBtn.classList.toggle("is-active", remoteMode === "appletv");
+      }
+      if (deviceHomePodBtn) {
+        deviceHomePodBtn.classList.toggle("is-active", remoteMode === "homepod");
       }
     }
 
@@ -989,6 +1473,569 @@
       }
       const safe = escapeHtml(message);
       screenStatusEl.innerHTML = isError ? `<span class="bad">${safe}</span>` : safe;
+    }
+
+    function normalizeVoiceText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/ä/g, "ae")
+        .replace(/ö/g, "oe")
+        .replace(/ü/g, "ue")
+        .replace(/ß/g, "ss")
+        .replace(/[^a-z0-9 ]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function createEmptyVoiceLearning() {
+      return {
+        phraseMap: {},
+        tokenMap: {},
+        learnedAt: 0
+      };
+    }
+
+    function loadVoiceLearning() {
+      try {
+        const raw = localStorage.getItem(VOICE_LEARN_STORAGE_KEY);
+        if (!raw) {
+          return createEmptyVoiceLearning();
+        }
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") {
+          return createEmptyVoiceLearning();
+        }
+        return {
+          phraseMap: parsed.phraseMap && typeof parsed.phraseMap === "object" ? parsed.phraseMap : {},
+          tokenMap: parsed.tokenMap && typeof parsed.tokenMap === "object" ? parsed.tokenMap : {},
+          learnedAt: Number(parsed.learnedAt || 0)
+        };
+      } catch (_error) {
+        return createEmptyVoiceLearning();
+      }
+    }
+
+    function saveVoiceLearning() {
+      try {
+        voiceLearning.learnedAt = Date.now();
+        localStorage.setItem(VOICE_LEARN_STORAGE_KEY, JSON.stringify(voiceLearning));
+      } catch (_error) {
+        // Ignore storage failures (private mode, quota, etc.).
+      }
+    }
+
+    function resetVoiceLearning() {
+      voiceLearning = createEmptyVoiceLearning();
+      saveVoiceLearning();
+    }
+
+    function buildVoiceKnownWords() {
+      const words = new Set(VOICE_COMMAND_KEYWORDS);
+      for (const aliases of Object.values(VOICE_SERVICE_ALIASES)) {
+        for (const alias of aliases) {
+          const normalized = normalizeVoiceText(alias);
+          if (!normalized) {
+            continue;
+          }
+          normalized.split(" ").forEach((token) => words.add(token));
+        }
+      }
+      return Array.from(words).filter((token) => token && !/^\d+$/.test(token));
+    }
+
+    function getVoiceKnownWords() {
+      if (!voiceKnownWords) {
+        voiceKnownWords = buildVoiceKnownWords();
+      }
+      return voiceKnownWords;
+    }
+
+    function levenshteinDistance(a, b) {
+      if (a === b) {
+        return 0;
+      }
+      if (!a) {
+        return b.length;
+      }
+      if (!b) {
+        return a.length;
+      }
+      const prev = new Array(b.length + 1).fill(0);
+      const curr = new Array(b.length + 1).fill(0);
+      for (let j = 0; j <= b.length; j += 1) {
+        prev[j] = j;
+      }
+      for (let i = 1; i <= a.length; i += 1) {
+        curr[0] = i;
+        for (let j = 1; j <= b.length; j += 1) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          curr[j] = Math.min(
+            prev[j] + 1,
+            curr[j - 1] + 1,
+            prev[j - 1] + cost
+          );
+        }
+        for (let j = 0; j <= b.length; j += 1) {
+          prev[j] = curr[j];
+        }
+      }
+      return prev[b.length];
+    }
+
+    function similarityScore(a, b) {
+      const maxLen = Math.max(a.length, b.length);
+      if (!maxLen) {
+        return 1;
+      }
+      return 1 - (levenshteinDistance(a, b) / maxLen);
+    }
+
+    function findClosestVoiceWord(token) {
+      if (!token || token.length < 4 || /^\d+$/.test(token)) {
+        return null;
+      }
+      let bestWord = "";
+      let bestScore = 0;
+      for (const knownWord of getVoiceKnownWords()) {
+        if (!knownWord || Math.abs(knownWord.length - token.length) > 2) {
+          continue;
+        }
+        const score = similarityScore(token, knownWord);
+        if (score > bestScore) {
+          bestScore = score;
+          bestWord = knownWord;
+        }
+      }
+      if (!bestWord || bestScore < VOICE_LEARN_MIN_SCORE) {
+        return null;
+      }
+      return { token, canonical: bestWord, score: bestScore };
+    }
+
+    function resolveVoiceCommandCandidate(rawSpoken) {
+      const normalized = normalizeVoiceText(rawSpoken);
+      if (!normalized) {
+        return {
+          normalized: "",
+          adapted: "",
+          candidateTokenPairs: [],
+          usedPhraseMap: false
+        };
+      }
+
+      let adapted = normalized;
+      let usedPhraseMap = false;
+      const mappedPhrase = voiceLearning.phraseMap[adapted];
+      if (mappedPhrase) {
+        adapted = mappedPhrase;
+        usedPhraseMap = true;
+      }
+
+      const candidateTokenPairs = [];
+      const adaptedTokens = adapted.split(" ").map((token) => {
+        if (!token) {
+          return token;
+        }
+        const mappedToken = voiceLearning.tokenMap[token];
+        if (mappedToken) {
+          return mappedToken;
+        }
+        const closest = findClosestVoiceWord(token);
+        if (!closest || closest.canonical === token) {
+          return token;
+        }
+        candidateTokenPairs.push({
+          from: token,
+          to: closest.canonical
+        });
+        return closest.canonical;
+      });
+
+      return {
+        normalized,
+        adapted: adaptedTokens.join(" ").replace(/\s+/g, " ").trim(),
+        candidateTokenPairs,
+        usedPhraseMap
+      };
+    }
+
+    function shouldLearnVoicePhrase(normalizedRaw, normalizedCanonical) {
+      if (!normalizedRaw || !normalizedCanonical) {
+        return false;
+      }
+      if (normalizedRaw === normalizedCanonical) {
+        return false;
+      }
+      if (/\d/.test(normalizedRaw) || /\d/.test(normalizedCanonical)) {
+        return false;
+      }
+      return normalizedRaw.split(" ").length <= 6;
+    }
+
+    function rememberVoiceLearning(candidate, canonicalCommand, allowPhraseLearning = true) {
+      if (!candidate || !canonicalCommand) {
+        return false;
+      }
+      let changed = false;
+      for (const pair of candidate.candidateTokenPairs || []) {
+        if (!pair || !pair.from || !pair.to || pair.from === pair.to) {
+          continue;
+        }
+        if (voiceLearning.tokenMap[pair.from] === pair.to) {
+          continue;
+        }
+        voiceLearning.tokenMap[pair.from] = pair.to;
+        changed = true;
+      }
+
+      const normalizedCanonical = normalizeVoiceText(canonicalCommand);
+      if (allowPhraseLearning && shouldLearnVoicePhrase(candidate.normalized, normalizedCanonical)) {
+        if (voiceLearning.phraseMap[candidate.normalized] !== normalizedCanonical) {
+          voiceLearning.phraseMap[candidate.normalized] = normalizedCanonical;
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        saveVoiceLearning();
+      }
+      return changed;
+    }
+
+    function escapeRegExp(value) {
+      return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function detectVoiceServiceLaunch(command) {
+      if (!command) {
+        return null;
+      }
+      const hasLaunchIntent = /\b(start(?:e|en)?|oeffn(?:e|en)?|offn(?:e|en)?|wechsel(?:\s+(?:zu|auf))?|geh(?:e)?\s+zu|spiel(?:e|en)?|mach(?:\s+\w+){0,2}\s+auf|schau(?:e)?|sehen|nutz(?:e)?)\b/.test(command);
+      const hasControlIntent = /\b(pause|stop|status|scan|zurueck|zuruck|lauter|leiser|lautstaerke|lautstarke|volume|kontrollzentrum|airplay)\b/.test(command);
+      const mentionedService = detectVoiceServiceMention(command);
+      if (!mentionedService) {
+        return null;
+      }
+      if (hasLaunchIntent) {
+        return mentionedService;
+      }
+      if (hasControlIntent) {
+        return null;
+      }
+      const onlyFewWords = command.split(" ").length <= 3;
+      return onlyFewWords ? mentionedService : null;
+    }
+
+    function detectVoiceServiceMention(command) {
+      if (!command) {
+        return null;
+      }
+      for (const [serviceKey, aliases] of Object.entries(VOICE_SERVICE_ALIASES)) {
+        for (const alias of aliases) {
+          const aliasRegex = new RegExp(`\\b${escapeRegExp(alias)}\\b`);
+          if (aliasRegex.test(command)) {
+            return serviceKey;
+          }
+        }
+      }
+      return null;
+    }
+
+    function hasWord(text, phrase) {
+      if (!text || !phrase) {
+        return false;
+      }
+      return new RegExp(`\\b${escapeRegExp(phrase)}\\b`).test(text);
+    }
+
+    function containsAnyWord(text, phrases) {
+      for (const phrase of phrases) {
+        if (hasWord(text, phrase)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function stripVoiceFillers(segment) {
+      const tokens = String(segment || "")
+        .split(" ")
+        .map((token) => token.trim())
+        .filter(Boolean)
+        .filter((token) => !VOICE_FILLER_WORDS.has(token));
+      return tokens.join(" ").trim();
+    }
+
+    function splitVoiceCommandSegments(command) {
+      if (!command) {
+        return [];
+      }
+      const separated = String(command)
+        .replace(/[.,;:!?]+/g, " | ")
+        .replace(/\b(?:und dann|und danach|dann|danach|anschliessend|anschliesend|sowie)\b/g, " | ");
+
+      const commandStartWords = new Set([
+        "starte",
+        "starten",
+        "oeffne",
+        "oeffnen",
+        "offne",
+        "offnen",
+        "wechsel",
+        "spiel",
+        "spiele",
+        "play",
+        "pause",
+        "stop",
+        "status",
+        "scan",
+        "verbinde",
+        "verbinden",
+        "lauter",
+        "leiser",
+        "lautstaerke",
+        "lautstarke",
+        "volume",
+        "zurueck",
+        "zuruck",
+        "kontrollzentrum",
+        "airplay",
+        "bildschirm",
+        "screen"
+      ]);
+
+      const finalParts = [];
+      const rawParts = separated
+        .split("|")
+        .map((part) => normalizeVoiceText(part))
+        .filter(Boolean);
+
+      for (const rawPart of rawParts) {
+        const tokens = rawPart.split(" ").filter(Boolean);
+        if (!tokens.length) {
+          continue;
+        }
+        let current = [];
+        for (let i = 0; i < tokens.length; i += 1) {
+          const token = tokens[i];
+          const next = tokens[i + 1] || "";
+          const prev = tokens[i - 1] || "";
+          if (token === "und") {
+            const prevNumber = parseSimpleGermanNumberToken(prev);
+            const nextNumber = parseSimpleGermanNumberToken(next);
+            if (prevNumber !== null && nextNumber !== null) {
+              current.push(token);
+              continue;
+            }
+            if (commandStartWords.has(next) && current.length) {
+              finalParts.push(current.join(" "));
+              current = [];
+              continue;
+            }
+          }
+          current.push(token);
+        }
+        if (current.length) {
+          finalParts.push(current.join(" "));
+        }
+      }
+
+      return finalParts
+        .map((part) => stripVoiceFillers(part))
+        .filter(Boolean);
+    }
+
+    function parseSimpleGermanNumberToken(token) {
+      if (!token) {
+        return null;
+      }
+      if (Object.prototype.hasOwnProperty.call(VOICE_UNIT_NUMBERS, token)) {
+        return VOICE_UNIT_NUMBERS[token];
+      }
+      if (Object.prototype.hasOwnProperty.call(VOICE_TENS_NUMBERS, token)) {
+        return VOICE_TENS_NUMBERS[token];
+      }
+      const directCompound = token.match(/^(ein|eins|zwei|zwo|drei|vier|fuenf|sechs|sieben|acht|neun)und(zwanzig|dreissig|vierzig|fuenfzig|sechzig|siebzig|achtzig|neunzig)$/);
+      if (directCompound) {
+        const unit = VOICE_UNIT_NUMBERS[directCompound[1]] || 0;
+        const tens = VOICE_TENS_NUMBERS[directCompound[2]] || 0;
+        return unit + tens;
+      }
+      return null;
+    }
+
+    function extractVoiceNumber(text) {
+      if (!text) {
+        return null;
+      }
+      const digitMatch = text.match(/\b(\d{1,3})\b/);
+      if (digitMatch) {
+        return Number(digitMatch[1]);
+      }
+      const tokens = text.split(" ").filter(Boolean);
+      for (let i = 0; i < tokens.length; i += 1) {
+        const single = parseSimpleGermanNumberToken(tokens[i]);
+        if (single !== null) {
+          return single;
+        }
+        if (i + 2 < tokens.length && tokens[i + 1] === "und") {
+          const left = parseSimpleGermanNumberToken(tokens[i]);
+          const right = parseSimpleGermanNumberToken(tokens[i + 2]);
+          if (left !== null && right !== null && right >= 20) {
+            return left + right;
+          }
+        }
+      }
+      return null;
+    }
+
+    function parseVolumeIntent(segment) {
+      if (!segment) {
+        return null;
+      }
+      const hasVolumeWord = containsAnyWord(segment, ["lautstaerke", "lautstarke", "volume"]);
+      const hasLouderWord = containsAnyWord(segment, ["lauter", "hoeher"]);
+      const hasLowerWord = containsAnyWord(segment, ["leiser", "leise", "weniger"]);
+
+      if (hasVolumeWord) {
+        const level = extractVoiceNumber(segment);
+        if (level !== null) {
+          return { type: "set_volume", level: Math.max(0, Math.min(100, level)) };
+        }
+      }
+      if (hasLouderWord || hasLowerWord) {
+        const amount = extractVoiceNumber(segment);
+        const step = amount === null ? 5 : Math.max(1, Math.min(40, amount));
+        return { type: "step_volume", delta: hasLowerWord ? -step : step };
+      }
+      return null;
+    }
+
+    function parseConnectIntent(segment) {
+      if (!containsAnyWord(segment, ["verbinde", "verbinden", "connect"])) {
+        return null;
+      }
+      if (containsAnyWord(segment, ["alle", "alles", "beide", "all"])) {
+        return { type: "connect", target: "all" };
+      }
+      if (containsAnyWord(segment, ["homepod"])) {
+        return { type: "connect", target: "homepod" };
+      }
+      if (containsAnyWord(segment, ["appletv", "apple tv"])) {
+        return { type: "connect", target: "appletv" };
+      }
+      return { type: "connect", target: "all" };
+    }
+
+    function parseRemoteIntent(segment) {
+      if (containsAnyWord(segment, ["zurueck", "zuruck", "menue verlassen", "menu verlassen"])) {
+        return { type: "remote", action: "back", target: "appletv" };
+      }
+      if (containsAnyWord(segment, ["kontrollzentrum", "control center", "airplay"])) {
+        return { type: "remote", action: "control_center", target: "appletv" };
+      }
+      if (hasWord(segment, "top menu")) {
+        return { type: "remote", action: "top_menu", target: "appletv" };
+      }
+      if (containsAnyWord(segment, ["hoch", "oben"]) && !hasWord(segment, "lauter")) {
+        return { type: "remote", action: "up", target: "appletv" };
+      }
+      if (containsAnyWord(segment, ["runter", "unten"]) && !containsAnyWord(segment, ["lauter", "leiser", "lautstaerke", "lautstarke", "volume"])) {
+        return { type: "remote", action: "down", target: "appletv" };
+      }
+      if (containsAnyWord(segment, ["links"])) {
+        return { type: "remote", action: "left", target: "appletv" };
+      }
+      if (containsAnyWord(segment, ["rechts"])) {
+        return { type: "remote", action: "right", target: "appletv" };
+      }
+      if (containsAnyWord(segment, ["ok", "auswaehlen", "auswahlen", "bestaetigen"])) {
+        return { type: "remote", action: "select", target: "appletv" };
+      }
+      return null;
+    }
+
+    function parseVoiceIntentSegment(segment) {
+      const clean = stripVoiceFillers(segment);
+      if (!clean) {
+        return null;
+      }
+
+      if (containsAnyWord(clean, ["voice reset", "sprache reset", "sprache lernen loeschen"])) {
+        return { type: "voice_reset" };
+      }
+
+      const volumeIntent = parseVolumeIntent(clean);
+      if (volumeIntent) {
+        return volumeIntent;
+      }
+
+      if (containsAnyWord(clean, ["bildschirm spiegeln", "system mirror"])) {
+        return { type: "screen_mirror" };
+      }
+      if (containsAnyWord(clean, ["bildschirm start", "screen start"])) {
+        return { type: "screen_start" };
+      }
+      if (containsAnyWord(clean, ["bildschirm stop", "screen stop"])) {
+        return { type: "screen_stop" };
+      }
+
+      const connectIntent = parseConnectIntent(clean);
+      if (connectIntent) {
+        return connectIntent;
+      }
+
+      const serviceToLaunch = detectVoiceServiceLaunch(clean);
+      if (serviceToLaunch) {
+        return { type: "open_service", key: serviceToLaunch };
+      }
+
+      const remoteIntent = parseRemoteIntent(clean);
+      if (remoteIntent) {
+        return remoteIntent;
+      }
+
+      if (containsAnyWord(clean, ["status", "wie ist", "was laeuft", "was lauft"])) {
+        return { type: "status" };
+      }
+      if (containsAnyWord(clean, ["scan", "suche geraete", "geraete suchen"])) {
+        return { type: "scan" };
+      }
+      if (containsAnyWord(clean, ["pause", "pausieren"])) {
+        return { type: "remote", action: "pause", target: "appletv" };
+      }
+      if (containsAnyWord(clean, ["play", "weiter", "fortsetzen", "abspielen"])) {
+        return { type: "remote", action: "play", target: "appletv" };
+      }
+      if (containsAnyWord(clean, ["stop", "anhalten", "beenden"])) {
+        return { type: "stop" };
+      }
+      return null;
+    }
+
+    function analyzeVoiceUtterance(command) {
+      const segments = splitVoiceCommandSegments(command);
+      if (!segments.length) {
+        return { segments: [], intents: [] };
+      }
+      const intents = [];
+      for (const segment of segments) {
+        const intent = parseVoiceIntentSegment(segment);
+        if (intent) {
+          intents.push(intent);
+        }
+      }
+      if (!intents.length) {
+        const fallbackIntent = parseVoiceIntentSegment(command);
+        if (fallbackIntent) {
+          intents.push(fallbackIntent);
+        }
+      }
+      return { segments, intents };
+    }
+
+    function parseVoiceUtterance(command) {
+      return analyzeVoiceUtterance(command).intents;
     }
 
     function escapeHtml(value) {
@@ -1395,11 +2442,41 @@
       if (fps) {
         payload.fps = fps;
       }
+      let data;
+      try {
+        data = await api("/api/screen_start", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        const message = error?.message || String(error);
+        const canFallback =
+          message.includes("Apple TV hat den Bildschirmstream nicht uebernommen") ||
+          message.includes("playback-info") ||
+          message.includes("code 500");
+        if (!canFallback) {
+          throw error;
+        }
 
-      const data = await api("/api/screen_start", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+        const mirror = await api("/api/open_system_mirror", { method: "POST", body: "{}" });
+        setOutput(
+          [
+            "Apple-TV Direktstream fehlgeschlagen",
+            message,
+            "",
+            "System-Mirroring als Fallback gestartet",
+            `PID: ${mirror.pid || "-"}`,
+            `Display: ${mirror.display || "-"}`,
+            `Command: ${(mirror.command || []).join(" ")}`,
+          ].join("\n")
+        );
+        setStatus(
+          "Direktstream fehlgeschlagen, System-Mirroring als Fallback gestartet",
+          true
+        );
+        await refreshScreenStatus();
+        return;
+      }
 
       const lines = [
         "Bildschirmstream gestartet",
@@ -1407,14 +2484,19 @@
         `Display: ${data.display || "-"}`,
         `Size/FPS: ${data.size || "-"} @ ${data.fps || "-"}`,
       ];
-      if (data.launch_stdout) {
-        lines.push(data.launch_stdout);
-      }
-      if (data.launch_stderr) {
-        lines.push(data.launch_stderr);
-      }
       if (data.launch_warning) {
         lines.push(`WARNUNG: ${data.launch_warning}`);
+        const detail = data.launch_detail || data.launch_stderr;
+        if (detail) {
+          lines.push(`Detail: ${detail}`);
+        }
+      } else {
+        if (data.launch_stdout) {
+          lines.push(data.launch_stdout);
+        }
+        if (data.launch_stderr) {
+          lines.push(data.launch_stderr);
+        }
       }
       setOutput(lines.join("\n"));
       setStatus(
@@ -1455,14 +2537,19 @@
       await setVolume(next);
     }
 
-    async function remote(action) {
+    async function remote(action, targetOverride = null) {
+      const target = (targetOverride || remoteMode || "appletv").toLowerCase();
       const data = await api("/api/remote", {
         method: "POST",
-        body: JSON.stringify({ action })
+        body: JSON.stringify({ action, target })
       });
       const text = [data.stdout || "", data.stderr || ""].filter(Boolean).join("\n");
-      setOutput(text);
-      setStatus(`Remote action: ${action}`);
+      if (text) {
+        setOutput(text);
+      } else {
+        setOutput(`Remote bestaetigt: ${action} (${data.target || target})`);
+      }
+      setStatus(`Remote action: ${action} (${data.target || target})`);
     }
 
     async function showFeatures() {
@@ -1516,100 +2603,188 @@
       setStatus(`${data.label} wurde auf Apple TV gestartet`);
     }
 
-    function voiceNumberFromText(text) {
-      const match = text.match(/\b(?:lautstaerke|volume)\s+(\d{1,3})\b/);
-      if (!match) {
-        return null;
+    function canonicalFromVoiceIntent(intent) {
+      if (!intent || !intent.type) {
+        return "unknown";
       }
-      const level = Number(match[1]);
-      if (!Number.isFinite(level)) {
-        return null;
+      if (intent.type === "set_volume") {
+        return `lautstaerke ${intent.level}`;
       }
-      return Math.max(0, Math.min(100, level));
+      if (intent.type === "step_volume") {
+        return intent.delta >= 0 ? `lauter ${intent.delta}` : `leiser ${Math.abs(intent.delta)}`;
+      }
+      if (intent.type === "open_service") {
+        return `oeffne ${intent.key}`;
+      }
+      if (intent.type === "remote") {
+        return `remote ${intent.action}`;
+      }
+      if (intent.type === "status") {
+        return "status";
+      }
+      if (intent.type === "screen_start") {
+        return "bildschirm start";
+      }
+      if (intent.type === "screen_stop") {
+        return "bildschirm stop";
+      }
+      if (intent.type === "screen_mirror") {
+        return "bildschirm spiegeln";
+      }
+      if (intent.type === "scan") {
+        return "scan";
+      }
+      if (intent.type === "stop") {
+        return "stop";
+      }
+      if (intent.type === "connect") {
+        return `verbinde ${intent.target || "all"}`;
+      }
+      if (intent.type === "voice_reset") {
+        return "voice reset";
+      }
+      return intent.type;
     }
 
-    async function executeVoiceCommand(raw) {
-      const command = raw.trim().toLowerCase();
-      if (!command) {
-        return;
+    async function executeVoiceIntent(intent) {
+      if (!intent || !intent.type) {
+        return false;
       }
 
-      setVoiceStatus(`Erkannt: ${command}`, true);
-
-      const fixedLevel = voiceNumberFromText(command);
-      if (fixedLevel !== null) {
-        $("volumeSlider").value = String(fixedLevel);
-        await setVolume(fixedLevel);
-        return;
+      if (intent.type === "voice_reset") {
+        resetVoiceLearning();
+        setOutput("Voice Lernprofil geloescht");
+        setStatus("Voice Lernprofil zurueckgesetzt");
+        return true;
       }
-
-      if (command.includes("spotify")) {
-        await openService("spotify");
-        return;
+      if (intent.type === "set_volume") {
+        $("volumeSlider").value = String(intent.level);
+        await setVolume(intent.level);
+        return true;
       }
-      if (command.includes("musik")) {
-        await openService("spotify");
-        return;
+      if (intent.type === "step_volume") {
+        await stepVolume(intent.delta);
+        return true;
       }
-      if (command.includes("netflix")) {
-        await openService("netflix");
-        return;
+      if (intent.type === "open_service") {
+        await openService(intent.key);
+        return true;
       }
-      if (command.includes("amazon")) {
-        await openService("amazon");
-        return;
+      if (intent.type === "remote") {
+        await remote(intent.action, intent.target || null);
+        return true;
       }
-      if (command.includes("joyn")) {
-        await openService("joyn");
-        return;
-      }
-      if (command.includes("lauter")) {
-        await remote("volume_up");
-        await refreshVolume();
-        return;
-      }
-      if (command.includes("leiser")) {
-        await remote("volume_down");
-        await refreshVolume();
-        return;
-      }
-      if (command.includes("status")) {
+      if (intent.type === "status") {
         await refreshPlaying();
         await refreshVolume();
         await refreshScreenStatus();
-        return;
+        return true;
       }
-      if (command.includes("bildschirm start") || command.includes("screen start")) {
+      if (intent.type === "screen_start") {
         await startScreenStream();
-        return;
+        return true;
       }
-      if (command.includes("bildschirm stop") || command.includes("screen stop")) {
+      if (intent.type === "screen_stop") {
         await stopScreenStream();
-        return;
+        return true;
       }
-      if (command.includes("bildschirm spiegeln") || command.includes("system mirror")) {
+      if (intent.type === "screen_mirror") {
         await openSystemMirror();
-        return;
+        return true;
       }
-      if (command.includes("stop")) {
-        await stop();
-        return;
-      }
-      if (command.includes("pause")) {
-        await remote("pause");
-        return;
-      }
-      if (command.includes("play")) {
-        await remote("play");
-        return;
-      }
-      if (command.includes("scan")) {
+      if (intent.type === "scan") {
         await scanDevices();
+        return true;
+      }
+      if (intent.type === "stop") {
+        await stop();
+        return true;
+      }
+      if (intent.type === "connect") {
+        await connectTarget(intent.target || "all");
+        return true;
+      }
+      return false;
+    }
+
+    async function executeVoiceCommand(raw, options = {}) {
+      const spoken = String(raw || "").trim();
+      const silentUnknown = Boolean(options.silentUnknown);
+      const candidate = resolveVoiceCommandCandidate(spoken);
+      const command = candidate.adapted;
+      if (!command) {
+        return { recognized: false };
+      }
+
+      const showCommand = candidate.normalized !== command
+        ? `${spoken} -> ${command}`
+        : spoken;
+      setVoiceStatus(`Erkannt: ${showCommand}`, true);
+
+      const analysis = analyzeVoiceUtterance(command);
+      const intents = analysis.intents;
+      setVoiceIntentDebug(candidate, analysis.segments, intents, null);
+      if (intents.length) {
+        const canonicalCommands = [];
+        for (const intent of intents) {
+          const executed = await executeVoiceIntent(intent);
+          if (executed) {
+            canonicalCommands.push(canonicalFromVoiceIntent(intent));
+          }
+        }
+        if (canonicalCommands.length) {
+          const canonical = canonicalCommands.join(" | ");
+          const allowPhraseLearning = canonicalCommands.length === 1;
+          rememberVoiceLearning(candidate, canonical, allowPhraseLearning);
+          setVoiceIntentDebug(candidate, analysis.segments, intents, true);
+          return { recognized: true, canonicalCommand: canonical };
+        }
+      }
+
+      if (!silentUnknown) {
+        setVoiceIntentDebug(candidate, analysis.segments, intents, false);
+        setOutput(
+          `Voice unklar.\nOriginal: "${spoken}"\nNormalisiert: "${candidate.normalized}"\nLernmodul: "${command}"`
+        );
+        setStatus(`Voice unbekannt: ${spoken}`, true);
+      }
+      return {
+        recognized: false,
+        command,
+        normalized: candidate.normalized
+      };
+    }
+
+    async function processVoiceAlternatives(result) {
+      if (!result || !result.length) {
+        return;
+      }
+      const seen = new Set();
+      const transcripts = [];
+      for (let i = 0; i < result.length; i += 1) {
+        const transcript = String(result[i]?.transcript || "").trim();
+        if (!transcript) {
+          continue;
+        }
+        const normalized = normalizeVoiceText(transcript);
+        if (!normalized || seen.has(normalized)) {
+          continue;
+        }
+        seen.add(normalized);
+        transcripts.push(transcript);
+      }
+      if (!transcripts.length) {
         return;
       }
 
-      setOutput(`Voice: kein Mapping fuer "${command}"`);
-      setStatus(`Voice unbekannt: ${command}`, true);
+      for (let i = 0; i < transcripts.length; i += 1) {
+        const outcome = await executeVoiceCommand(transcripts[i], {
+          silentUnknown: i < transcripts.length - 1
+        });
+        if (outcome && outcome.recognized) {
+          return;
+        }
+      }
     }
 
     function ensureVoiceRecognition() {
@@ -1625,7 +2800,7 @@
       voiceRecognition.lang = "de-DE";
       voiceRecognition.interimResults = false;
       voiceRecognition.continuous = true;
-      voiceRecognition.maxAlternatives = 1;
+      voiceRecognition.maxAlternatives = 5;
 
       voiceRecognition.onstart = () => {
         setVoiceStatus("Sprachsteuerung: aktiv", true);
@@ -1649,8 +2824,8 @@
 
       voiceRecognition.onresult = (event) => {
         const index = event.resultIndex;
-        const transcript = event.results[index][0].transcript || "";
-        run(() => executeVoiceCommand(transcript));
+        const result = event.results[index];
+        run(() => processVoiceAlternatives(result));
       };
 
       return true;
@@ -1684,13 +2859,18 @@
       setOutput(
         [
           "Voice Befehle:",
-          "- play / pause / stop",
-          "- lauter / leiser",
-          "- lautstaerke 35",
-          "- status",
-          "- musik / spotify / netflix / amazon / joyn",
+          "- Ganze Saetze: 'kannst du bitte netflix oeffnen'",
+          "- Mehrfachaktionen: 'lauter und dann status'",
+          "- starte joyn / oeffne netflix / wechsel zu spotify",
+          "- play / pause / stop / weiter / fortsetzen",
+          "- lauter / leiser / lauter um 10 / lautstaerke 35",
+          "- status / scan / verbinde homepod / verbinde alle",
+          "- zurueck / menue verlassen",
+          "- kontrollzentrum / airplay",
           "- bildschirm start / bildschirm stop",
-          "- scan",
+          "- Voice Diagnose zeigt Segmente + Intents live",
+          "- lernfaehig fuer Aussprache-Varianten (lokal gespeichert)",
+          "- voice reset / sprache reset (Lerndaten loeschen)"
         ].join("\n")
       );
       setStatus("Voice Hilfe angezeigt");
@@ -1702,6 +2882,17 @@
       } catch (error) {
         setStatus(error.message || String(error), true);
       }
+    }
+
+    function isTypingTarget(target) {
+      if (!target) {
+        return false;
+      }
+      const tag = (target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") {
+        return true;
+      }
+      return Boolean(target.isContentEditable);
     }
 
     $("saveConfig").addEventListener("click", () => run(saveConfig));
@@ -1721,7 +2912,7 @@
     $("play").addEventListener("click", () => run(play));
     $("stop").addEventListener("click", () => run(stop));
     $("refreshPlaying").addEventListener("click", () => run(refreshPlaying));
-    $("rPlayPause").addEventListener("click", () => run(() => remote("play_pause")));
+    $("rPlayPause").addEventListener("click", () => run(() => remote("select")));
     $("rPlay").addEventListener("click", () => run(() => remote("play")));
     $("rPause").addEventListener("click", () => run(() => remote("pause")));
     $("rStop").addEventListener("click", () => run(() => remote("stop")));
@@ -1729,8 +2920,23 @@
     $("rNext").addEventListener("click", () => run(() => remote("next")));
     $("rSkipBack").addEventListener("click", () => run(() => remote("skip_backward")));
     $("rSkipFwd").addEventListener("click", () => run(() => remote("skip_forward")));
+    $("rBackExit").addEventListener("click", () => run(() => remote("back")));
     $("rMenu").addEventListener("click", () => run(() => remote("menu")));
     $("rHome").addEventListener("click", () => run(() => remote("home")));
+    $("rTopMenu").addEventListener("click", () => run(() => remote("top_menu")));
+    $("rControlCenter").addEventListener("click", () => run(() => remote("control_center")));
+    if ($("rUp")) {
+      $("rUp").addEventListener("click", () => run(() => remote("up")));
+    }
+    if ($("rDown")) {
+      $("rDown").addEventListener("click", () => run(() => remote("down")));
+    }
+    if ($("rLeft")) {
+      $("rLeft").addEventListener("click", () => run(() => remote("left")));
+    }
+    if ($("rRight")) {
+      $("rRight").addEventListener("click", () => run(() => remote("right")));
+    }
     $("rVolUp").addEventListener("click", () => run(() => remote("volume_up")));
     $("rVolDown").addEventListener("click", () => run(() => remote("volume_down")));
     $("showFeatures").addEventListener("click", () => run(showFeatures));
@@ -1749,6 +2955,37 @@
     $("systemMirrorOpen").addEventListener("click", () => run(openSystemMirror));
     $("voiceToggle").addEventListener("click", () => toggleVoice());
     $("voiceHelp").addEventListener("click", () => run(showVoiceHelp));
+    document.addEventListener("keydown", (event) => {
+      if (event.repeat || isTypingTarget(event.target)) {
+        return;
+      }
+
+      let action = null;
+      if (event.key === "ArrowUp") {
+        action = "up";
+      } else if (event.key === "ArrowDown") {
+        action = "down";
+      } else if (event.key === "ArrowLeft") {
+        action = "left";
+      } else if (event.key === "ArrowRight") {
+        action = "right";
+      } else if (event.key === "Enter") {
+        action = "select";
+      }
+
+      if (!action) {
+        return;
+      }
+
+      event.preventDefault();
+      run(() => remote(action));
+    });
+    if (deviceAppleTVBtn) {
+      deviceAppleTVBtn.addEventListener("click", () => setRemoteMode("appletv"));
+    }
+    if (deviceHomePodBtn) {
+      deviceHomePodBtn.addEventListener("click", () => setRemoteMode("homepod"));
+    }
     if (mediaFileInputEl) {
       mediaFileInputEl.addEventListener("change", () => {
         const file = mediaFileInputEl.files && mediaFileInputEl.files[0] ? mediaFileInputEl.files[0] : null;
@@ -1814,6 +3051,7 @@
       await run(refreshStreamStatus);
       await run(refreshScreenStatus);
       await run(refreshPlaying);
+      setRemoteMode("appletv");
       setVoiceStatus("Sprachsteuerung: inaktiv", false);
       setOutput("Bereit fuer atvremote-Kommandos.");
       setInterval(() => run(refreshStreamStatus), 4000);

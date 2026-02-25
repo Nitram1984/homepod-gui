@@ -57,6 +57,8 @@ Hinweis: `DEINE_HOMEPOD_IP` und `DEINE_APPLETV_IP` sind nur Platzhalter. Bitte d
 - Eigene Apple-TV-Zielkonfiguration (`Apple TV IP` + `Apple TV Name`) in der GUI
 - Menue-Buttons `HomePod verbinden`, `Apple TV verbinden`, `Alle verbinden` fuer aktive Verbindungspruefung
 - Bildschirm-Stream vom Laptop auf Apple TV (`Screen Start/Stop/Status`) via `play_url` + HLS
+- Lernfaehige Voice-Erkennung fuer Aussprache-Varianten mit Satzverstaendnis und Mehrfachaktionen (lokales Lernprofil im Browser, reset per `voice reset`)
+- Voice-Intent-Diagnose in der GUI (zeigt Segmentierung + erkannte Intents live)
 
 ## Hinweis Bildschirm-Stream
 
