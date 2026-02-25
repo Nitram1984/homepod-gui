@@ -13,6 +13,10 @@ import subprocess
 import sys
 import threading
 import time
+import base64
+import binascii
+import hmac
+import ssl
 from urllib.parse import unquote
 from dataclasses import dataclass
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -23,13 +27,52 @@ from typing import Any, Callable
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-ATVREMOTE_BIN = os.environ.get("ATVREMOTE_BIN", "/home/maddin/.local/bin/atvremote")
-DEFAULT_IP = os.environ.get("HOMEPOD_IP", "192.168.178.183")
-DEFAULT_NAME = os.environ.get("HOMEPOD_NAME", "Wohnzimmer")
-DEFAULT_TV_IP = os.environ.get("APPLETV_IP", "192.168.178.181")
-DEFAULT_TV_NAME = os.environ.get("APPLETV_NAME", "Maddin")
+
+def _atvremote_candidates() -> list[str]:
+    candidates: list[str] = []
+    env_bin = os.environ.get("ATVREMOTE_BIN", "").strip()
+    if env_bin:
+        candidates.append(env_bin)
+    for candidate in (
+        shutil.which("atvremote"),
+        str(Path.home() / ".local" / "bin" / "atvremote"),
+        "/usr/local/bin/atvremote",
+        "/usr/bin/atvremote",
+        "atvremote",
+    ):
+        if candidate and candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+def _resolve_atvremote_bin() -> tuple[str, bool]:
+    for candidate in _atvremote_candidates():
+        if "/" in candidate:
+            if Path(candidate).exists():
+                return candidate, True
+            continue
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved, True
+    fallback = os.environ.get("ATVREMOTE_BIN", "").strip() or "atvremote"
+    return fallback, False
+
+
+ATVREMOTE_BIN, ATVREMOTE_EXISTS = _resolve_atvremote_bin()
+DEFAULT_IP = os.environ.get("HOMEPOD_IP", "")
+DEFAULT_NAME = os.environ.get("HOMEPOD_NAME", "HomePod")
+DEFAULT_TV_IP = os.environ.get("APPLETV_IP", "")
+DEFAULT_TV_NAME = os.environ.get("APPLETV_NAME", "Apple TV")
 DEFAULT_HOST = os.environ.get("HOMEPOD_GUI_HOST", "127.0.0.1")
 DEFAULT_PORT = int(os.environ.get("HOMEPOD_GUI_PORT", "8788"))
+DEFAULT_AUTH_USER = os.environ.get("HOMEPOD_GUI_AUTH_USER", "").strip()
+DEFAULT_AUTH_PASSWORD = os.environ.get("HOMEPOD_GUI_AUTH_PASSWORD", "")
+DEFAULT_TLS_CERT = Path(
+    os.environ.get("HOMEPOD_GUI_TLS_CERT", str(Path.home() / ".config" / "homepod-gui" / "cert.pem"))
+).expanduser()
+DEFAULT_TLS_KEY = Path(
+    os.environ.get("HOMEPOD_GUI_TLS_KEY", str(Path.home() / ".config" / "homepod-gui" / "key.pem"))
+).expanduser()
 UPLOADS_DIR = BASE_DIR / "uploads"
 MAX_UPLOAD_BYTES = int(os.environ.get("MEDIA_UPLOAD_MAX_BYTES", str(512 * 1024 * 1024)))
 SCREENCAST_DIR = BASE_DIR / "screencast"
@@ -71,9 +114,13 @@ REMOTE_ACTIONS = {
     "down": "down",
     "left": "left",
     "right": "right",
+    "back": "menu",
     "select": "select",
     "menu": "menu",
     "home": "home",
+    "home_hold": "home_hold",
+    "top_menu": "top_menu",
+    "control_center": "control_center",
     "volume_up": "volume_up",
     "volume_down": "volume_down",
 }
@@ -84,6 +131,44 @@ TV_SERVICES = {
     "joyn": {"label": "Joyn", "bundle_id": "de.prosiebensat1digital.seventv"},
     "spotify": {"label": "Spotify", "bundle_id": "com.spotify.client"},
 }
+
+
+def _ensure_self_signed_cert(cert_path: Path, key_path: Path) -> None:
+    if cert_path.exists() and key_path.exists():
+        return
+
+    cert_path.parent.mkdir(parents=True, exist_ok=True)
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+
+    cmd = [
+        "openssl",
+        "req",
+        "-x509",
+        "-nodes",
+        "-newkey",
+        "rsa:2048",
+        "-days",
+        "3650",
+        "-subj",
+        "/CN=localhost",
+        "-keyout",
+        str(key_path),
+        "-out",
+        str(cert_path),
+    ]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=20)
+    except FileNotFoundError as exc:
+        raise RuntimeError("openssl ist nicht installiert") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError("openssl timeout beim Erstellen des TLS-Zertifikats") from exc
+
+    if proc.returncode != 0:
+        stderr = proc.stderr.strip() or proc.stdout.strip() or "unbekannter openssl Fehler"
+        raise RuntimeError(f"TLS-Zertifikat konnte nicht erstellt werden: {stderr}")
+
+    os.chmod(key_path, 0o600)
+    os.chmod(cert_path, 0o644)
 
 
 @dataclass
@@ -548,7 +633,10 @@ class ScreenCastManager:
                 raise RuntimeError(f"screen capture fehlgeschlagen: {details}. {hint}")
 
             launch_warning = ""
+            launch_detail = ""
             launch_result = launch_play_url(stream_url)
+            launch_stdout = launch_result.get("stdout", "")
+            launch_stderr = launch_result.get("stderr", "")
             if launch_result["returncode"] != 0:
                 raw_error = "\n".join(
                     part for part in [launch_result["stderr"], launch_result["stdout"]] if part
@@ -557,6 +645,9 @@ class ScreenCastManager:
                     launch_warning = (
                         "Apple TV meldet playback-info 500; Stream wurde trotzdem gestartet."
                     )
+                    launch_stdout = ""
+                    launch_stderr = ""
+                    launch_detail = compact_error(raw_error, max_len=260)
                 else:
                     error_text = compact_error(raw_error or "play_url auf Apple TV fehlgeschlagen")
                     raise RuntimeError(f"Apple TV konnte Stream nicht starten: {error_text}")
@@ -573,10 +664,13 @@ class ScreenCastManager:
                 self._last_error = ""
 
             snapshot = self.status()
-            snapshot["launch_stdout"] = launch_result["stdout"]
-            snapshot["launch_stderr"] = launch_result["stderr"]
+            snapshot["launch_returncode"] = launch_result["returncode"]
+            snapshot["launch_stdout"] = launch_stdout
+            snapshot["launch_stderr"] = launch_stderr
             if launch_warning:
                 snapshot["launch_warning"] = launch_warning
+            if launch_detail:
+                snapshot["launch_detail"] = launch_detail
             return snapshot
         except Exception as exc:
             if ffmpeg_proc is not None:
@@ -603,7 +697,15 @@ SCREENCAST = ScreenCastManager()
 
 
 def atv_command_parts_for(config: DeviceConfig, args: list[str]) -> list[str]:
-    return [ATVREMOTE_BIN, "-s", config.ip, "-n", config.name, *args]
+    command: list[str] = [ATVREMOTE_BIN]
+    ip = config.ip.strip()
+    name = config.name.strip()
+    if ip:
+        command.extend(["-s", ip])
+    if name:
+        command.extend(["-n", name])
+    command.extend(args)
+    return command
 
 
 def atv_command_parts(args: list[str]) -> list[str]:
@@ -614,55 +716,69 @@ def atv_tv_command_parts(args: list[str]) -> list[str]:
     return atv_command_parts_for(TV_CONFIG.get(), args)
 
 
-def run_atv(args: list[str], timeout: int = 12) -> dict[str, Any]:
-    command = atv_command_parts(args)
-    completed = subprocess.run(
-        command,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-        check=False,
-    )
+def _run_command(command: list[str], timeout: int) -> dict[str, Any]:
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        missing = exc.filename or command[0]
+        return {
+            "command": command,
+            "returncode": 127,
+            "stdout": "",
+            "stderr": f"command not found: {missing}",
+        }
+    except subprocess.TimeoutExpired as exc:
+        out = (exc.stdout or "").strip() if isinstance(exc.stdout, str) else ""
+        err = (exc.stderr or "").strip() if isinstance(exc.stderr, str) else ""
+        detail = f"timeout after {timeout}s"
+        if err:
+            detail = f"{detail} ({err})"
+        return {
+            "command": command,
+            "returncode": 124,
+            "stdout": out,
+            "stderr": detail,
+        }
     return {
         "command": command,
         "returncode": completed.returncode,
         "stdout": completed.stdout.strip(),
         "stderr": completed.stderr.strip(),
     }
+
+
+def run_atv(args: list[str], timeout: int = 12) -> dict[str, Any]:
+    config = CONFIG.get()
+    if not config.ip.strip():
+        return {
+            "command": atv_command_parts(args),
+            "returncode": 2,
+            "stdout": "",
+            "stderr": "homepod ip ist nicht gesetzt",
+        }
+    return _run_command(atv_command_parts_for(config, args), timeout=timeout)
 
 
 def run_atv_tv(args: list[str], timeout: int = 12) -> dict[str, Any]:
-    command = atv_tv_command_parts(args)
-    completed = subprocess.run(
-        command,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-        check=False,
-    )
-    return {
-        "command": command,
-        "returncode": completed.returncode,
-        "stdout": completed.stdout.strip(),
-        "stderr": completed.stderr.strip(),
-    }
+    config = TV_CONFIG.get()
+    if not config.ip.strip():
+        return {
+            "command": atv_tv_command_parts(args),
+            "returncode": 2,
+            "stdout": "",
+            "stderr": "appletv ip ist nicht gesetzt",
+        }
+    return _run_command(atv_command_parts_for(config, args), timeout=timeout)
 
 
 def run_scan(timeout: int = 18) -> dict[str, Any]:
-    command = [ATVREMOTE_BIN, "-t", "8", "scan"]
-    completed = subprocess.run(
-        command,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-        check=False,
-    )
-    return {
-        "command": command,
-        "returncode": completed.returncode,
-        "stdout": completed.stdout.strip(),
-        "stderr": completed.stderr.strip(),
-    }
+    return _run_command([ATVREMOTE_BIN, "-t", "8", "scan"], timeout=timeout)
 
 
 def check_connection(target: str) -> dict[str, Any]:
@@ -753,6 +869,43 @@ def parse_playing(text: str) -> dict[str, str]:
     return out
 
 
+def playing_signature(text: str) -> str:
+    parsed = parse_playing(text)
+    preferred = [
+        parsed.get("Identifier", "").strip(),
+        parsed.get("Title", "").strip(),
+        parsed.get("Device state", "").strip(),
+        parsed.get("Media type", "").strip(),
+    ]
+    compact = "|".join([item for item in preferred if item])
+    if compact:
+        return compact
+    return str(text).strip()
+
+
+def extract_output_device_id(result: dict[str, Any]) -> str:
+    blobs = [str(result.get("stdout", "")), str(result.get("stderr", ""))]
+    line_pattern = re.compile(r"^[0-9A-Fa-f-]{12,64}$")
+    uuid_pattern = re.compile(
+        r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"
+    )
+
+    for blob in blobs:
+        lines = [line.strip() for line in blob.splitlines() if line.strip()]
+        for line in reversed(lines):
+            if line_pattern.fullmatch(line):
+                return line
+            match = uuid_pattern.search(line)
+            if match:
+                return match.group(0)
+
+    joined = "\n".join(blobs)
+    match = uuid_pattern.search(joined)
+    if match:
+        return match.group(0)
+    return ""
+
+
 def is_playback_info_500_error(text: str) -> bool:
     lowered = str(text).lower()
     if not lowered:
@@ -801,11 +954,66 @@ def compact_error(text: str, max_len: int = 320) -> str:
 
 
 class Handler(SimpleHTTPRequestHandler):
+    auth_user = DEFAULT_AUTH_USER or None
+    auth_password = DEFAULT_AUTH_PASSWORD or None
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A003
         print(f"[http] {self.address_string()} - {format % args}")
+
+    @classmethod
+    def _auth_enabled(cls) -> bool:
+        return bool(cls.auth_user and cls.auth_password)
+
+    def _send_unauthorized(self) -> None:
+        if self.path.startswith("/api/"):
+            body = json.dumps({"ok": False, "error": "Authentifizierung erforderlich"}).encode("utf-8")
+            self.send_response(401)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("WWW-Authenticate", 'Basic realm="homepod-gui", charset="UTF-8"')
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        body = b"Authentifizierung erforderlich\n"
+        self.send_response(401)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("WWW-Authenticate", 'Basic realm="homepod-gui", charset="UTF-8"')
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _is_authorized(self) -> bool:
+        if not self._auth_enabled():
+            return True
+
+        header = self.headers.get("Authorization", "").strip()
+        if not header.lower().startswith("basic "):
+            return False
+
+        token = header[6:].strip()
+        try:
+            decoded = base64.b64decode(token, validate=True).decode("utf-8")
+        except (binascii.Error, UnicodeDecodeError):
+            return False
+
+        user, sep, password = decoded.partition(":")
+        if sep != ":":
+            return False
+        if self.auth_user is None or self.auth_password is None:
+            return False
+        return hmac.compare_digest(user, self.auth_user) and hmac.compare_digest(
+            password, self.auth_password
+        )
+
+    def _require_auth(self) -> bool:
+        if self._is_authorized():
+            return True
+        self._send_unauthorized()
+        return False
 
     def _send_json(self, payload: dict[str, Any], status: int = 200) -> None:
         body = json.dumps(payload).encode("utf-8")
@@ -826,6 +1034,9 @@ class Handler(SimpleHTTPRequestHandler):
         self._send_json({"ok": False, "error": message}, status=status)
 
     def do_GET(self) -> None:  # noqa: N802
+        if not self._require_auth():
+            return
+
         if not self.path.startswith("/api/"):
             return super().do_GET()
 
@@ -835,7 +1046,7 @@ class Handler(SimpleHTTPRequestHandler):
                 {
                     "ok": True,
                     "atvremote_bin": ATVREMOTE_BIN,
-                    "atvremote_exists": Path(ATVREMOTE_BIN).exists(),
+                    "atvremote_exists": ATVREMOTE_EXISTS,
                     "ip": cfg.ip,
                     "name": cfg.name,
                 }
@@ -917,6 +1128,9 @@ class Handler(SimpleHTTPRequestHandler):
         self._error("unknown endpoint", status=404)
 
     def do_POST(self) -> None:  # noqa: N802
+        if not self._require_auth():
+            return
+
         if not self.path.startswith("/api/"):
             self._error("unknown endpoint", status=404)
             return
@@ -1094,12 +1308,13 @@ class Handler(SimpleHTTPRequestHandler):
                     return
 
             tv_cfg = TV_CONFIG.get()
+            pre_playing_result = run_atv_tv(["playing"], timeout=8)
 
             tv_output_id: str | None = None
             output_set_result: dict[str, Any] | None = None
             output_id_result = run_atv_tv(["output_device_id"], timeout=10)
             if output_id_result["returncode"] == 0:
-                candidate = output_id_result["stdout"].strip()
+                candidate = extract_output_device_id(output_id_result)
                 if candidate:
                     tv_output_id = candidate
                     output_set_result = run_atv_tv(
@@ -1128,6 +1343,32 @@ class Handler(SimpleHTTPRequestHandler):
                 snapshot["output_set_returncode"] = output_set_result["returncode"]
                 snapshot["output_set_stdout"] = output_set_result["stdout"]
                 snapshot["output_set_stderr"] = output_set_result["stderr"]
+
+            post_playing_result = run_atv_tv(["playing"], timeout=10)
+            post_playing_text = post_playing_result.get("stdout", "")
+            snapshot["tv_playing_after"] = post_playing_text
+
+            if snapshot.get("launch_returncode", 0) != 0:
+                pre_sig = playing_signature(pre_playing_result.get("stdout", ""))
+                post_sig = playing_signature(post_playing_text)
+                unchanged = bool(pre_sig and post_sig and pre_sig == post_sig)
+                stopped_or_unknown = "Device state: Stopped" in post_playing_text or not post_sig
+                if post_playing_result.get("returncode", 1) != 0 or unchanged or stopped_or_unknown:
+                    SCREENCAST.stop()
+                    detail = (
+                        str(snapshot.get("launch_detail", "")).strip()
+                        or str(snapshot.get("launch_stderr", "")).strip()
+                    )
+                    message = "Apple TV hat den Bildschirmstream nicht uebernommen."
+                    if "code 500" in detail:
+                        message += (
+                            " AirPlay-Autorisierung auf Apple TV pruefen: "
+                            "Einstellungen > AirPlay & HomeKit > Zugriff."
+                        )
+                    if detail:
+                        message = f"{message} Detail: {detail}"
+                    self._error(message, status=502)
+                    return
 
             self._send_json({"ok": True, **snapshot})
             return
@@ -1213,7 +1454,18 @@ class Handler(SimpleHTTPRequestHandler):
             if command is None:
                 self._error("unbekannte action")
                 return
-            result = run_atv([command], timeout=10)
+
+            raw_target = data.get("target")
+            target = str(raw_target).strip().lower() if raw_target is not None else ""
+            if target not in {"", "homepod", "appletv"}:
+                self._error("unbekanntes target")
+                return
+
+            if not target:
+                target = "appletv"
+
+            runner = run_atv_tv if target == "appletv" else run_atv
+            result = runner([command], timeout=10)
             if result["returncode"] != 0:
                 self._error(result["stderr"] or result["stdout"] or f"{action} failed", status=502)
                 return
@@ -1221,6 +1473,7 @@ class Handler(SimpleHTTPRequestHandler):
                 {
                     "ok": True,
                     "action": action,
+                    "target": target,
                     "stdout": result["stdout"],
                     "stderr": result["stderr"],
                 }
@@ -1313,17 +1566,45 @@ class Handler(SimpleHTTPRequestHandler):
         self._error("unknown endpoint", status=404)
 
 
-def main() -> None:
+def main() -> int:
+    if bool(DEFAULT_AUTH_USER) ^ bool(DEFAULT_AUTH_PASSWORD):
+        print("Fehler: Fuer Basic Auth muessen User und Passwort gesetzt sein.")
+        return 2
+
+    try:
+        _ensure_self_signed_cert(DEFAULT_TLS_CERT, DEFAULT_TLS_KEY)
+    except RuntimeError as exc:
+        print(f"Fehler: {exc}")
+        return 2
+
+    if not DEFAULT_TLS_CERT.exists() or not DEFAULT_TLS_KEY.exists():
+        print("Fehler: TLS-Zertifikat oder Key fehlt.")
+        return 2
+
+    Handler.auth_user = DEFAULT_AUTH_USER or None
+    Handler.auth_password = DEFAULT_AUTH_PASSWORD or None
+
     server = ThreadingHTTPServer((DEFAULT_HOST, DEFAULT_PORT), Handler)
-    print(f"HomePod GUI laeuft auf http://{DEFAULT_HOST}:{DEFAULT_PORT}")
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
+    ssl_context.load_cert_chain(certfile=str(DEFAULT_TLS_CERT), keyfile=str(DEFAULT_TLS_KEY))
+    server.socket = ssl_context.wrap_socket(server.socket, server_side=True)
+
+    print(f"HomePod GUI laeuft auf https://{DEFAULT_HOST}:{DEFAULT_PORT}")
     print(f"ATVREMOTE_BIN={ATVREMOTE_BIN}")
+    print(f"TLS_CERT={DEFAULT_TLS_CERT}")
+    if Handler._auth_enabled():
+        print(f"Auth: aktiviert (User={Handler.auth_user})")
+    else:
+        print("Auth: deaktiviert")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nStoppe Server...")
     finally:
         server.server_close()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
